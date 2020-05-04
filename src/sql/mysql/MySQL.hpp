@@ -18,7 +18,7 @@
 /**
  * mysql数据库连接
  */
-class MySql : public Connection {
+class MySQL : public Connection {
 public:
     void setOption(const DatabaseOption &option) override {
         this->option = option;
@@ -133,6 +133,7 @@ public:
                 resultBinds[i].buffer = strBuf.data();
                 resultBinds[i].buffer_length = 64;
             }
+            //......
             std::cout << "name:" << mysqlRes->fields[i].name << " type: " << mysqlRes->fields[i].type << std::endl;
         }
         //绑定查询结果
@@ -151,9 +152,15 @@ public:
 
     void bindValue(int pos, const boost::any &value) override {
         if (value.type() == typeid(int)) {
-            int i = boost::any_cast<int>(value);
+//            auto i = boost::any_cast<const int &>(value);
+//            paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
+//            paramBinds[pos].buffer = &i;
+        }
+        if (value.type() == typeid(std::string)) {
+            auto i = boost::any_cast<std::string>(value);
             paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
             paramBinds[pos].buffer = &i;
+            paramBinds[pos].buffer_length = i.length();
         }
     }
 

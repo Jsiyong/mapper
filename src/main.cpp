@@ -3,18 +3,20 @@
 //
 
 
-#include <sql/MySql.hpp>
+#include <sql/mysql/MySQL.hpp>
+#include <sql/mysql/TypeMapping.hpp>
 
 int main() {
 
-    Connection *connection = new MySql;
+    Connection *connection = new MySQL;
     connection->setOption(DatabaseOption());
     connection->connect();
 //    bool isConnect = connection->ping();
 //    mySql->query();
     std::string sql = "select * from user where `id` >= ?";
     connection->prepare(sql);
-    connection->bindValue(0, 1);
+    int i = 1;
+    connection->bindValue(0, i);
     connection->execute();
     while (connection->next()) {
         std::cout << "id = " << boost::any_cast<int>(connection->value(0));
