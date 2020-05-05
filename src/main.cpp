@@ -3,24 +3,27 @@
 //
 
 
-#include <sql/mysql/MySQL.hpp>
-#include <sql/mysql/TypeMapping.hpp>
+#include <sql/Connection.hpp>
+#include <sql/TypeMapping.hpp>
+#include <sql/PrepareBinder.hpp>
 
 int main() {
 
-    Connection *connection = new MySQL;
-    connection->setOption(DatabaseOption());
-    connection->connect();
+    std::vector<int> a = {1, 2, 3, 4};
+    a.clear();
+
+    Connection connection;
+    connection.setOption(DatabaseOption());
+    connection.connect();
 //    bool isConnect = connection->ping();
 //    mySql->query();
-    std::string sql = "select * from user where `id` >= ?";
-    connection->prepare(sql);
-    int i = 1;
-    connection->bindValue(0, i);
-    connection->execute();
-    while (connection->next()) {
-        std::cout << "id = " << boost::any_cast<int>(connection->value(0));
-        std::cout << " name = " << boost::any_cast<std::string>(connection->value(1)) << std::endl;
+    std::string sql = "select * from user where `id` > ?";
+    connection.prepare(sql);
+    connection.bindValue(0, 1);
+    connection.execute();
+    while (connection.next()) {
+        std::cout << "id = " << connection.getIntValue(0);
+        std::cout << " name = " << connection.getStringValue(1) << std::endl;
     }
 
     return 0;
