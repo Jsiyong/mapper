@@ -6,12 +6,9 @@
 #define MAPPER_CONNECTION_HPP
 
 
-#include "TypeMapping.hpp"
 #include "DatabaseOption.hpp"
 #include "PrepareBinder.hpp"
 #include "ResultBinder.hpp"
-#include <ResultSet.hpp>
-#include <Row.hpp>
 #include <mysql.h>
 #include <memory>
 #include <vector>
@@ -141,31 +138,20 @@ public:
     bool execute() {
 
         //绑定查询参数
-        if (mysql_stmt_bind_param(mysqlStmt, &paramBinds[0])) {
+        if (mysql_stmt_bind_param(mysqlStmt, &prepareBinder->getParamBinds()[0])) {
             setLastError("mysql_stmt_bind_param error");
             return false;
         }
 
         //获取结果集元数据
         mysqlRes = mysql_stmt_result_metadata(mysqlStmt);
-
-//        std::vector<std::vector<char>> result;
-//        std::vector<MYSQL_BIND> resultBinds;
         auto columnNum = mysql_num_fields(mysqlRes);
-//        resultBinds.resize(columnNum);
-//        resultRow.resize(columnNum);//查询结果行
-//        strBuf.resize(64);
         resultBinder = std::make_shared<ResultBinder>(columnNum);
-//        std::vector<bool> isNull(columnNum, false);
-//        std::vector<bool> error(columnNum, false);
-//        std::vector<int> length(columnNum, 0);
         //根据表元数据绑定结果集
         for (int i = 0; i < mysqlRes->field_count; i++) {
             resultBinder->bindValue(mysqlRes->fields[i].type, i);
-        }
-        //......
 //            std::cout << "name:" << mysqlRes->fields[i].name << " type: " << mysqlRes->fields[i].type << std::endl;
-//        }
+        }
         //绑定查询结果
         if (mysql_stmt_bind_result(mysqlStmt, &resultBinder->getBindResult()[0])) {
             setLastError("mysql_stmt_bind_result");
@@ -187,11 +173,7 @@ public:
      */
     template<typename T>
     void bindValue(int pos, const T &value) {
-        if (pos >= paramBinds.size()) {
-            setLastError("bind pos out of range");
-            return;
-        }
-        PrepareBinder::bindValue(paramBinds[pos], value);
+        prepareBinder->bindValue(pos, value);
     }
 
     /**
@@ -212,7 +194,7 @@ public:
         }
         //获取预处理绑定的参数个数
         auto paramCount = mysql_stmt_param_count(mysqlStmt);
-        paramBinds.resize(paramCount);//初始化绑定参数列表
+        prepareBinder = std::make_shared<PrepareBinder>(paramCount);
         return true;
     }
 
@@ -226,21 +208,13 @@ public:
     }
 
     /**
-     * 提取结果集中的整型结果
-     * @param index
-     * @return
-     */
-    int getIntValue(int index) {
-        return resultBinder->getIntValue(index);
-    }
-
-    /**
-    * 提取结果集中的字符串结果
+    * 提取结果集中的结果
     * @param index
     * @return
     */
-    std::string getStringValue(int index) {
-        return resultBinder->getStringValue(index);
+    template<typename T>
+    T value(int index) {
+        return resultBinder->value<T>(index);
     }
 
 private:
@@ -250,8 +224,8 @@ private:
 
     std::string lastError;//最后的错误信息
     DatabaseOption option;//数据库配置信息
-    std::vector<MYSQL_BIND> paramBinds;//预处理的参数绑定
 
+    std::shared_ptr<PrepareBinder> prepareBinder = nullptr;
     std::shared_ptr<ResultBinder> resultBinder = nullptr;
 
 };

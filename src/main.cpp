@@ -9,21 +9,17 @@
 
 int main() {
 
-    std::vector<int> a = {1, 2, 3, 4};
-    a.clear();
-
     Connection connection;
     connection.setOption(DatabaseOption());
     connection.connect();
-//    bool isConnect = connection->ping();
-//    mySql->query();
-    std::string sql = "select * from user where `id` > ?";
+    std::string sql = "select name,id from user where id > ? and name like ?";
     connection.prepare(sql);
     connection.bindValue(0, 1);
+    connection.bindValue(1, "%i%");
     connection.execute();
     while (connection.next()) {
-        std::cout << "id = " << connection.getIntValue(0);
-        std::cout << " name = " << connection.getStringValue(1) << std::endl;
+        std::cout << "id = " << connection.value<int>(1);
+        std::cout << " name = " << connection.value<std::string>(0) << std::endl;
     }
 
     return 0;

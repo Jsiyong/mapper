@@ -16,6 +16,18 @@
  */
 class ResultBinder {
 private:
+    /**
+     * 负责类型转发
+     * @tparam T
+     */
+    template<typename T>
+    struct IndexWrapper {
+        int index = 0;//索引
+
+        explicit IndexWrapper(int index) : index(index) {}
+    };
+
+private:
     const static int STRING_MAX_LENGTH = 65535;
 
     std::vector<MYSQL_BIND> resultBinds;
@@ -42,6 +54,24 @@ private:
         resultBinds[index].buffer_type = MYSQL_TYPE_STRING;
         resultBinds[index].buffer = stringBuffer[index].data();
         resultBinds[index].buffer_length = STRING_MAX_LENGTH;
+    }
+
+    /**
+    * 提取结果集中的字符串结果
+    * @param index
+    * @return
+    */
+    std::string value(IndexWrapper<std::string> wrapper) {
+        return stringBuffer[wrapper.index].data();
+    }
+
+    /**
+    * 提取结果集中的整型结果
+    * @param index
+    * @return
+    */
+    int value(IndexWrapper<int> wrapper) {
+        return intBuffer[wrapper.index];
     }
 
 public:
@@ -72,21 +102,13 @@ public:
     }
 
     /**
-    * 提取结果集中的整型结果
+    * 提取结果集中的结果
     * @param index
     * @return
     */
-    int getIntValue(int index) {
-        return intBuffer[index];
-    }
-
-    /**
-    * 提取结果集中的字符串结果
-    * @param index
-    * @return
-    */
-    std::string getStringValue(int index) {
-        return stringBuffer[index].data();
+    template<typename T>
+    T value(int index) {
+        return value(std::move(IndexWrapper<T>(index)));
     }
 
     std::vector<MYSQL_BIND> &getBindResult() {

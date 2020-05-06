@@ -9,31 +9,59 @@
 #include <string>
 #include <algorithm>
 #include <mysql.h>
+#include <iostream>
 
 /**
  * mysql的预处理绑定器
  */
 class PrepareBinder {
 private:
-
+    std::vector<MYSQL_BIND> paramBinds;//预处理的参数绑定
 public:
 
-    static void bindValue(MYSQL_BIND &mysqlBind, const int &value) {
-        mysqlBind.buffer_type = MYSQL_TYPE_LONG;
-        mysqlBind.buffer = (void *) &value;
-        mysqlBind.is_unsigned = false;
+    /**
+     * 绑定的参数集的大小
+     * @param resultBindNum
+     */
+    explicit PrepareBinder(int prepareBindNum) {
+        paramBinds.resize(prepareBindNum);//初始化绑定参数列表
     }
 
-    static void bindValue(MYSQL_BIND &mysqlBind, const unsigned int &value) {
-        mysqlBind.buffer_type = MYSQL_TYPE_LONG;
-        mysqlBind.buffer = (void *) &value;
-        mysqlBind.is_unsigned = true;
+    std::vector<MYSQL_BIND> &getParamBinds() {
+        return paramBinds;
     }
 
-    static void bindValue(MYSQL_BIND &mysqlBind, const std::string &value) {
-        mysqlBind.buffer_type = MYSQL_TYPE_STRING;
-        mysqlBind.buffer = (void*)value.c_str();
-        mysqlBind.buffer_length = value.size();
+    /**
+     * 绑定整型
+     * @param pos
+     * @param value
+     */
+    void bindValue(int pos, const int &value) {
+        paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
+        paramBinds[pos].buffer = (void *) &value;
+        paramBinds[pos].is_unsigned = false;
+    }
+
+    /**
+     * 绑定无符号整型
+     * @param pos
+     * @param value
+     */
+    void bindValue(int pos, const unsigned int &value) {
+        paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
+        paramBinds[pos].buffer = (void *) &value;
+        paramBinds[pos].is_unsigned = true;
+    }
+
+    /**
+     * 绑定字符串
+     * @param pos
+     * @param value
+     */
+    void bindValue(int pos, const std::string &value) {
+        paramBinds[pos].buffer_type = MYSQL_TYPE_STRING;
+        paramBinds[pos].buffer = (void *) value.c_str();
+        paramBinds[pos].buffer_length = value.size();
     }
 };
 
