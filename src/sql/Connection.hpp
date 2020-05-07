@@ -14,6 +14,7 @@
 #include <vector>
 #include <iostream>
 #include <list>
+#include <chrono>
 
 /**
  * mysql数据库连接
@@ -227,6 +228,7 @@ private:
 
     std::shared_ptr<PrepareBinder> prepareBinder = nullptr;
     std::shared_ptr<ResultBinder> resultBinder = nullptr;
+
 
 };
 
