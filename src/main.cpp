@@ -12,6 +12,9 @@ int main() {
     ConnectionPool::getInstance()->initInternal();
     {
         ConnectionPool::getInstance()->getConnection();
+        ConnectionPool::getInstance()->getConnection();
+        ConnectionPool::getInstance()->getConnection();
+        ConnectionPool::getInstance()->getConnection();
         auto connection = ConnectionPool::getInstance()->getConnection();
         connection->connect();
         std::string sql = "select name,id from user where id > ? and name like ?";
