@@ -6,6 +6,7 @@
 #define MAPPER_ENTITYWRAPPER_HPP
 
 #include <memory>
+#include "EntityTableMap.hpp"
 
 /**
  * 实体类的外包增强类
@@ -18,8 +19,8 @@ public:
      * 获取实体类的反射信息
      * @param entity
      */
-    void getReflectionInfo(std::shared_ptr<Entity> entity) {
-
+    std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<Entity> entity) {
+        return nullptr;
     }
 };
 

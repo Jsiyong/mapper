@@ -7,8 +7,24 @@
 #include <sql/TypeMapping.hpp>
 #include <sql/PrepareBinder.hpp>
 #include <sql/ConnectionPool.hpp>
+#include <entity/User.hpp>
+#include <sql/builder/SelectBuilder.hpp>
 
 int main() {
+    SelectBuilder selectBuilder;
+    auto sql = selectBuilder.select("*")
+            .from("user")
+            .leftJoin("person on a=b")
+            .where("id1=?")
+            .where("id2=?")
+            .where("name=?")
+            .toString();
+
+
+    EntityWrapper<User> user;
+    auto usr = std::make_shared<User>();
+    auto aaa = user.getReflectionInfo(usr);
+
     ConnectionPool::getInstance()->initInternal();
     {
         ConnectionPool::getInstance()->getConnection();
