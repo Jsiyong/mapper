@@ -27,10 +27,10 @@ public:
     std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<User> entity) {
         return std::make_shared<EntityTableMap>(
                 EntityTable("User", "user"),
-                std::initializer_list<PropertyColumn>({
-                                                              PropertyColumn(&entity->id, "id", "id"),
-                                                              PropertyColumn(&entity->name, "name", "name")
-                                                      })
+                std::vector<PropertyColumn>({
+                                                    PropertyColumn(&entity->id, "id", "id"),
+                                                    PropertyColumn(&entity->name, "name", "name")
+                                            })
         );
 
     }

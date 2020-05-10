@@ -16,7 +16,9 @@
  */
 class EntityTable {
 private:
-    std::string tableName;
+    std::string tableName;//表名
+    std::string className;//类名
+
 public:
     EntityTable() = default;
 
@@ -24,8 +26,6 @@ public:
             : tableName(std::move(tableName)),
               className(std::move(className)) {}
 
-private:
-    std::string className;
 public:
 
 

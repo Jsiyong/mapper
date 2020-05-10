@@ -4,13 +4,15 @@
 
 
 #include <sql/Connection.hpp>
-#include <sql/TypeMapping.hpp>
 #include <sql/PrepareBinder.hpp>
 #include <sql/ConnectionPool.hpp>
 #include <entity/User.hpp>
 #include <sql/builder/SQLBuilder.hpp>
+#include <util/StringUtils.hpp>
 
 int main() {
+
+    auto name=StringUtils::camelhump2Underline("userName");
 
 
     auto sql1 = SQLBuilder()
