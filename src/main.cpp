@@ -8,18 +8,56 @@
 #include <sql/PrepareBinder.hpp>
 #include <sql/ConnectionPool.hpp>
 #include <entity/User.hpp>
-#include <sql/builder/SelectBuilder.hpp>
+#include <sql/builder/SQLBuilder.hpp>
 
 int main() {
-    SelectBuilder selectBuilder;
-    auto sql = selectBuilder.select("*")
-            .from("user")
-            .leftJoin("person on a=b")
-            .where("id1=?")
-            .where("id2=?")
-            .where("name=?")
+
+
+    auto sql1 = SQLBuilder()
+            .SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME")
+            .SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON")
+            .FROM("PERSON P")
+            .FROM("ACCOUNT A")
+            .INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID")
+            .INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID")
+            .WHERE("P.ID = A.ID")
+            .WHERE("P.FIRST_NAME like ?")
+            .OR()
+            .WHERE("P.LAST_NAME like ?")
+            .GROUP_BY("P.ID")
+            .HAVING("P.LAST_NAME like ?")
+            .OR()
+            .HAVING("P.FIRST_NAME like ?")
+            .ORDER_BY("P.ID")
+            .ORDER_BY("P.FULL_NAME")
+            .LIMIT("?", "?")
             .toString();
 
+    auto sql2 = SQLBuilder()
+            .INSERT_INTO("PERSON")
+            .VALUES("ID, FIRST_NAME", "?, ?")
+            .VALUES("LAST_NAME", "?")
+            .toString();
+
+    auto sql3 = SQLBuilder()
+            .INSERT_INTO("TABLE_A")
+            .INTO_COLUMNS("a,b,c,d")
+            .INTO_VALUES("1,2,3,4")
+            .ADD_ROW()
+            .INTO_VALUES("5,6")
+            .INTO_VALUES("7,8")
+            .toString();
+
+    auto sql4 = SQLBuilder()
+            .DELETE_FROM("PERSON")
+            .WHERE("id=?")
+            .LIMIT("20")
+            .toString();
+    auto sql5 = SQLBuilder()
+            .UPDATE("PERSON")
+            .SET("name=?")
+            .WHERE("id=10")
+            .toString();
 
     EntityWrapper<User> user;
     auto usr = std::make_shared<User>();
