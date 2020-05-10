@@ -62,7 +62,7 @@ private:
         builder.append(keyword);
         builder.append(" ");
         builder.append(open);
-        std::string last = "________";
+        std::string last = "";
         for (int i = 0, n = parts.size(); i < n; i++) {
             std::string part = parts.at(i);
             if (i > 0 && part != AND && part != OR && last != AND && last != OR) {
