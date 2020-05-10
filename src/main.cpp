@@ -9,10 +9,22 @@
 #include <entity/User.hpp>
 #include <sql/builder/SQLBuilder.hpp>
 #include <util/StringUtils.hpp>
+#include <util/TypeUtils.hpp>
 
 int main() {
 
-    auto name=StringUtils::camelhump2Underline("userName");
+    bool v1 = TypeUtils::isCollection(std::vector<int>());
+    bool v2 = TypeUtils::isCollection(std::set<int>());
+    bool v3 = TypeUtils::isCollection(std::string());
+    bool v4 = TypeUtils::isCollection(std::list<int>());
+    bool v5 = TypeUtils::isCollection(1);
+
+    std::string a1 = "123";
+    void *_a1 = (void *) &a1;
+    std::string a22 = *(std::string *) _a1;
+
+
+    auto name = StringUtils::camelhump2Underline("userName");
 
 
     auto sql1 = SQLBuilder()

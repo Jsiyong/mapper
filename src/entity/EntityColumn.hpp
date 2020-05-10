@@ -2,8 +2,8 @@
 // Created by Jiangsiyong on 5/9/2020.
 //
 
-#ifndef MAPPER_PROPERTYCOLUMN_HPP
-#define MAPPER_PROPERTYCOLUMN_HPP
+#ifndef MAPPER_ENTITYCOLUMN_HPP
+#define MAPPER_ENTITYCOLUMN_HPP
 
 #include <string>
 #include <typeindex>
@@ -11,7 +11,7 @@
 /**
  * 属性与数据库列的对应关系
  */
-class PropertyColumn {
+class EntityColumn {
 public:
     void *pProperty = nullptr;//实体类字段地址
     std::type_index typeIndex;//实体类字段类型信息
@@ -22,7 +22,7 @@ public:
 
 public:
     template<typename T>
-    PropertyColumn(T *pProperty, const std::string &propertyName, const std::string &columnName):typeIndex(typeid(T)) {
+    EntityColumn(T *pProperty, const std::string &propertyName, const std::string &columnName):typeIndex(typeid(T)) {
         this->pProperty = pProperty;
         this->propertyName = propertyName;
         this->columnName = columnName;
@@ -30,4 +30,4 @@ public:
 
 };
 
-#endif //MAPPER_PROPERTYCOLUMN_HPP
+#endif //MAPPER_ENTITYCOLUMN_HPP

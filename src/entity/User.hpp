@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 #include "EntityWrapper.hpp"
-#include "PropertyColumn.hpp"
+#include "EntityColumn.hpp"
 #include "EntityTableMap.hpp"
 
 struct User {
@@ -27,9 +27,9 @@ public:
     std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<User> entity) {
         return std::make_shared<EntityTableMap>(
                 EntityTable("User", "user"),
-                std::vector<PropertyColumn>({
-                                                    PropertyColumn(&entity->id, "id", "id"),
-                                                    PropertyColumn(&entity->name, "name", "name")
+                std::vector<EntityColumn>({
+                                                  EntityColumn(&entity->id, "id", "id"),
+                                                  EntityColumn(&entity->name, "name", "name")
                                             })
         );
 

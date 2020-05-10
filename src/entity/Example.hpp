@@ -10,6 +10,8 @@
  */
 class Example {
 public:
+
+
 };
 
 #endif //MAPPER_EXAMPLE_HPP

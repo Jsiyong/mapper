@@ -34,7 +34,7 @@ public:
     }
 
     /**
-     * 将驼峰风格替换为下划线风格
+     * 将驼峰风格替换为下划线小写风格
      */
     static std::string camelhump2Underline(const std::string &str) {
         std::string result;

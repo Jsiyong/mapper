@@ -22,9 +22,20 @@ enum class KeySql {
     UUID//UUID
 };
 
+/**
+ * 删除逻辑
+ */
 enum class DeleteLogic {
     PhysicalDelete,//物理删除
     LogicDelete//逻辑删除
+};
+
+/**
+ * 字段转换方式
+ */
+enum class Style {
+    Normal,//原值
+    CamelhumpAndLowercase//驼峰转下划线小写形式
 };
 
 #endif //MAPPER_ENTITYENUM_HPP
