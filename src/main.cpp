@@ -11,7 +11,46 @@
 #include <util/StringUtils.hpp>
 #include <util/TypeUtils.hpp>
 
+template<typename T>
+class BaseAspect {
+private:
+    T *t = nullptr;
+protected:
+    explicit BaseAspect(T *t) : t(t) {}
+
+    virtual ~BaseAspect() = default;
+
+public:
+    T *operator->() {
+        return t;
+    }
+};
+
+template<typename T>
+class LogAspect : public BaseAspect<T> {
+public:
+    explicit LogAspect(T *t) : BaseAspect<T>(t) {
+        std::cout << "Hello world!!" << std::endl;
+    }
+
+    ~LogAspect() override {
+        std::cout << "LogAspect!!" << std::endl;
+    }
+};
+
+class Action {
+public:
+    std::string say(int i) {
+        std::cout << "hahaha " << i << std::endl;
+        return "iiiii";
+    }
+};
+
+
 int main() {
+    Action action;
+    auto haah = LogAspect<Action>(&action)->say(100);
+
 
     bool v1 = TypeUtils::isCollection(std::vector<int>());
     bool v2 = TypeUtils::isCollection(std::set<int>());

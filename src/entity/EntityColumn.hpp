@@ -15,17 +15,23 @@ class EntityColumn {
 public:
     void *pProperty = nullptr;//实体类字段地址
     std::type_index typeIndex;//实体类字段类型信息
-
-
-    std::string columnName = "";//数据库列名
-    std::string propertyName = "";//实体类属性名
+    std::string column = "";//数据库列名
+    std::string property = "";//实体类属性名
 
 public:
     template<typename T>
-    EntityColumn(T *pProperty, const std::string &propertyName, const std::string &columnName):typeIndex(typeid(T)) {
+    EntityColumn(T *pProperty, const std::string &property, const std::string &column):typeIndex(typeid(T)) {
         this->pProperty = pProperty;
-        this->propertyName = propertyName;
-        this->columnName = columnName;
+        this->property = property;
+        this->column = column;
+    }
+
+    const std::string &getColumn() const {
+        return column;
+    }
+
+    const std::string &getProperty() const {
+        return property;
     }
 
 };
