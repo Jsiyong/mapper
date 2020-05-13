@@ -12,7 +12,7 @@
  * 属性与数据库列的对应关系
  */
 class EntityColumn {
-public:
+private:
     void *pProperty = nullptr;//实体类字段地址
     std::type_index typeIndex;//实体类字段类型信息
     std::string column = "";//数据库列名

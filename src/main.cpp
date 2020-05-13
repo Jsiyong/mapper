@@ -7,56 +7,27 @@
 #include <sql/PrepareBinder.hpp>
 #include <sql/ConnectionPool.hpp>
 #include <entity/User.hpp>
-#include <sql/builder/SQLBuilder.hpp>
+#include <builder/SQLBuilder.hpp>
 #include <util/StringUtils.hpp>
 #include <util/TypeUtils.hpp>
-
-template<typename T>
-class BaseAspect {
-private:
-    T *t = nullptr;
-protected:
-    explicit BaseAspect(T *t) : t(t) {}
-
-    virtual ~BaseAspect() = default;
-
-public:
-    T *operator->() {
-        return t;
-    }
-};
-
-template<typename T>
-class LogAspect : public BaseAspect<T> {
-public:
-    explicit LogAspect(T *t) : BaseAspect<T>(t) {
-        std::cout << "Hello world!!" << std::endl;
-    }
-
-    ~LogAspect() override {
-        std::cout << "LogAspect!!" << std::endl;
-    }
-};
-
-class Action {
-public:
-    std::string say(int i) {
-        std::cout << "hahaha " << i << std::endl;
-        return "iiiii";
-    }
-};
-
+#include <entity/Example.hpp>
 
 int main() {
-    Action action;
-    auto haah = LogAspect<Action>(&action)->say(100);
+    Example<User> example;
+    auto item1 = example.createCriteria();
+    item1->andIn("id", std::set<int>({1, 2, 3}));
+    item1->andEqualTo("id", 2);
+    auto item2 = example.createCriteria();
+    item2->andBetween("name", "123", "456");
+    example.orCriteria(item2);
+    auto res = example.getSelectByExample();
 
 
-    bool v1 = TypeUtils::isCollection(std::vector<int>());
-    bool v2 = TypeUtils::isCollection(std::set<int>());
-    bool v3 = TypeUtils::isCollection(std::string());
-    bool v4 = TypeUtils::isCollection(std::list<int>());
-    bool v5 = TypeUtils::isCollection(1);
+//    bool v1 = TypeUtils::isCollection(std::vector<int>());
+//    bool v2 = TypeUtils::isCollection(std::set<int>());
+//    bool v3 = TypeUtils::isCollection(std::string());
+//    bool v4 = TypeUtils::isCollection(std::list<int>());
+//    bool v5 = TypeUtils::isCollection(1);
 
     std::string a1 = "123";
     void *_a1 = (void *) &a1;
@@ -66,51 +37,51 @@ int main() {
     auto name = StringUtils::camelhump2Underline("userName");
 
 
-    auto sql1 = SQLBuilder()
-            .SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME")
-            .SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON")
-            .FROM("PERSON P")
-            .FROM("ACCOUNT A")
-            .INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID")
-            .INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID")
-            .WHERE("P.ID = A.ID")
-            .WHERE("P.FIRST_NAME like ?")
-            .OR()
-            .WHERE("P.LAST_NAME like ?")
-            .GROUP_BY("P.ID")
-            .HAVING("P.LAST_NAME like ?")
-            .OR()
-            .HAVING("P.FIRST_NAME like ?")
-            .ORDER_BY("P.ID")
-            .ORDER_BY("P.FULL_NAME")
-            .LIMIT("?", "?")
-            .toString();
+    auto sql1 = std::make_shared<SQLBuilder>()
+            ->SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME")
+            ->SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON")
+            ->FROM("PERSON P")
+            ->FROM("ACCOUNT A")
+            ->INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID")
+            ->INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID")
+            ->WHERE("P.ID = A.ID")
+            ->WHERE("P.FIRST_NAME like ?")
+            ->OR()
+            ->WHERE("P.LAST_NAME like ?")
+            ->GROUP_BY("P.ID")
+            ->HAVING("P.LAST_NAME like ?")
+            ->OR()
+            ->HAVING("P.FIRST_NAME like ?")
+            ->ORDER_BY("P.ID")
+            ->ORDER_BY("P.FULL_NAME")
+            ->LIMIT("?", "?")
+            ->toString();
 
-    auto sql2 = SQLBuilder()
-            .INSERT_INTO("PERSON")
-            .VALUES("ID, FIRST_NAME", "?, ?")
-            .VALUES("LAST_NAME", "?")
-            .toString();
+    auto sql2 = std::make_shared<SQLBuilder>()
+            ->INSERT_INTO("PERSON")
+            ->VALUES("ID, FIRST_NAME", "?, ?")
+            ->VALUES("LAST_NAME", "?")
+            ->toString();
 
-    auto sql3 = SQLBuilder()
-            .INSERT_INTO("TABLE_A")
-            .INTO_COLUMNS("a,b,c,d")
-            .INTO_VALUES("1,2,3,4")
-            .ADD_ROW()
-            .INTO_VALUES("5,6")
-            .INTO_VALUES("7,8")
-            .toString();
+    auto sql3 = std::make_shared<SQLBuilder>()
+            ->INSERT_INTO("TABLE_A")
+            ->INTO_COLUMNS("a,b,c,d")
+            ->INTO_VALUES("1,2,3,4")
+            ->ADD_ROW()
+            ->INTO_VALUES("5,6")
+            ->INTO_VALUES("7,8")
+            ->toString();
 
-    auto sql4 = SQLBuilder()
-            .DELETE_FROM("PERSON")
-            .WHERE("id=?")
-            .LIMIT("20")
-            .toString();
-    auto sql5 = SQLBuilder()
-            .UPDATE("PERSON")
-            .SET("name=?")
-            .WHERE("id=10")
-            .toString();
+    auto sql4 = std::make_shared<SQLBuilder>()
+            ->DELETE_FROM("PERSON")
+            ->WHERE("id=?")
+            ->LIMIT("20")
+            ->toString();
+    auto sql5 = std::make_shared<SQLBuilder>()
+            ->UPDATE("PERSON")
+            ->SET("name=?")
+            ->WHERE("id=10")
+            ->toString();
 
     EntityWrapper<User> user;
     auto usr = std::make_shared<User>();

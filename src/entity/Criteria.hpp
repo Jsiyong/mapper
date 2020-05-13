@@ -21,6 +21,9 @@ private:
     std::vector<Criterion> criteria;//标准的集合
     //属性和列对应
     std::map<std::string, EntityColumn> *propertyMap = nullptr;
+    //连接条件
+    std::string andOr;
+
 private:
 
     /**
@@ -33,7 +36,7 @@ private:
             //返回实体类列名
             return propertyMap->at(property).getColumn();
         } else {
-            //属性不存在,跑异常
+            //属性不存在,抛异常
             throw MapperException("[property]" + property + "is not exist!");
         }
     }
@@ -52,7 +55,22 @@ private:
     }
 
 public:
+    explicit Criteria(std::map<std::string, EntityColumn> *propertyMap)
+            : propertyMap(propertyMap) {}
 
+    void setAndOr(const std::string &andOr) {
+        this->andOr = andOr;
+    }
+
+    const std::string &getAndOr() const {
+        return this->andOr;
+    }
+
+    const std::vector<Criterion> &getCriteria() const {
+        return criteria;
+    }
+
+public:
     ////////////////////// and ///////////////////////////////
     Criteria *andIsNull(const std::string &property) {
         criteria.emplace_back(Criterion(column(property) + " IS NULL"));

@@ -26,7 +26,7 @@ public:
      */
     std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<User> entity) {
         return std::make_shared<EntityTableMap>(
-                EntityTable("User", "user"),
+                 EntityTable("User", "user"),
                 std::vector<EntityColumn>({
                                                   EntityColumn(&entity->id, "id", "id"),
                                                   EntityColumn(&entity->name, "name", "name")

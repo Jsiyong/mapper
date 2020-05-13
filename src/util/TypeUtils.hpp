@@ -22,22 +22,25 @@ public:
      * @return
      */
     template<typename T>
-    static bool isCollection(const std::vector<T> &t) {
+    static bool isCollection(const std::vector<T> &t, int &size) {
+        size = t.size();
         return true;
     }
 
     template<typename T>
-    static bool isCollection(const std::set<T> &t) {
+    static bool isCollection(const std::set<T> &t, int &size) {
+        size = t.size();
         return true;
     }
 
     template<typename T>
-    static bool isCollection(const std::list<T> &t) {
+    static bool isCollection(const std::list<T> &t, int &size) {
+        size = t.size();
         return true;
     }
 
     template<typename T>
-    static bool isCollection(const T &t) {
+    static bool isCollection(const T &t, int &size) {
         return false;
     }
 

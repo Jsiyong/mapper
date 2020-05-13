@@ -16,137 +16,137 @@ private:
     SQLStatement sql;
 
 public:
-    SQLBuilder &UPDATE(const std::string &table) {
+    SQLBuilder *UPDATE(const std::string &table) {
         sql.statementType = SQLStatement::StatementType::UPDATE;
         sql.tables.emplace_back(table);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &SET(const std::string &sets) {
+    SQLBuilder *SET(const std::string &sets) {
         sql.sets.emplace_back(sets);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &INSERT_INTO(const std::string &tableName) {
+    SQLBuilder *INSERT_INTO(const std::string &tableName) {
         sql.statementType = SQLStatement::StatementType::INSERT;
         sql.tables.emplace_back(tableName);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &VALUES(const std::string &columns, const std::string &values) {
+    SQLBuilder *VALUES(const std::string &columns, const std::string &values) {
         INTO_COLUMNS(columns);
         INTO_VALUES(values);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &INTO_COLUMNS(const std::string &columns) {
+    SQLBuilder *INTO_COLUMNS(const std::string &columns) {
         sql.columns.emplace_back(columns);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &INTO_VALUES(const std::string &values) {
+    SQLBuilder *INTO_VALUES(const std::string &values) {
         sql.valuesList.back().emplace_back(values);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &SELECT(const std::string &columns) {
+    SQLBuilder *SELECT(const std::string &columns) {
         sql.statementType = SQLStatement::StatementType::SELECT;
         sql.select.emplace_back(columns);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &SELECT_DISTINCT(const std::string &columns) {
+    SQLBuilder *SELECT_DISTINCT(const std::string &columns) {
         sql.distinct = true;
         return SELECT(columns);
     }
 
-    SQLBuilder &DELETE_FROM(const std::string &table) {
+    SQLBuilder *DELETE_FROM(const std::string &table) {
         sql.statementType = SQLStatement::StatementType::DELETE;
         sql.tables.emplace_back(table);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &FROM(const std::string &table) {
+    SQLBuilder *FROM(const std::string &table) {
         sql.tables.emplace_back(table);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &JOIN(const std::string &join) {
+    SQLBuilder *JOIN(const std::string &join) {
         sql.join.emplace_back(join);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &INNER_JOIN(const std::string &join) {
+    SQLBuilder *INNER_JOIN(const std::string &join) {
         sql.innerJoin.emplace_back(join);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &LEFT_OUTER_JOIN(const std::string &join) {
+    SQLBuilder *LEFT_OUTER_JOIN(const std::string &join) {
         sql.leftOuterJoin.emplace_back(join);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &RIGHT_OUTER_JOIN(const std::string &join) {
+    SQLBuilder *RIGHT_OUTER_JOIN(const std::string &join) {
         sql.rightOuterJoin.emplace_back(join);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &OUTER_JOIN(const std::string &join) {
+    SQLBuilder *OUTER_JOIN(const std::string &join) {
         sql.outerJoin.emplace_back(join);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &WHERE(const std::string &conditions) {
+    SQLBuilder *WHERE(const std::string &conditions) {
         sql.where.emplace_back(conditions);
         sql.lastList = &sql.where;
-        return *this;
+        return this;
     }
 
-    SQLBuilder &OR() {
+    SQLBuilder *OR() {
         sql.lastList->emplace_back(sql.OR);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &AND() {
+    SQLBuilder *AND() {
         sql.lastList->emplace_back(sql.AND);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &GROUP_BY(const std::string &columns) {
+    SQLBuilder *GROUP_BY(const std::string &columns) {
         sql.groupBy.emplace_back(columns);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &HAVING(const std::string &conditions) {
+    SQLBuilder *HAVING(const std::string &conditions) {
         sql.having.emplace_back(conditions);
         sql.lastList = &sql.having;
-        return *this;
+        return this;
     }
 
-    SQLBuilder &ORDER_BY(const std::string &columns) {
+    SQLBuilder *ORDER_BY(const std::string &columns) {
         sql.orderBy.emplace_back(columns);
-        return *this;
+        return this;
     }
 
-    SQLBuilder &LIMIT(const std::string &variable, const std::string &offset) {
+    SQLBuilder *LIMIT(const std::string &variable, const std::string &offset) {
         sql.limit = variable;
         sql.offset = offset;
-        return *this;
+        return this;
     }
 
-    SQLBuilder &LIMIT(const std::string &variable) {
+    SQLBuilder *LIMIT(const std::string &variable) {
         sql.limit = variable;
         sql.offset = std::to_string(0);
-        return *this;
+        return this;
     }
 
     /**
      * 批量插入时,多插入一行
      * @return
      */
-    SQLBuilder &ADD_ROW() {
+    SQLBuilder *ADD_ROW() {
         sql.valuesList.resize(sql.valuesList.size() + 1);
-        return *this;
+        return this;
     }
 
     std::string toString() {

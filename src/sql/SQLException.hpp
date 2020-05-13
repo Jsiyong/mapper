@@ -8,7 +8,7 @@
 /**
  * 数据库异常类
  */
-class SqlException {
+class SQLException {
 
 };
 
