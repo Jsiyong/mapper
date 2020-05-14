@@ -21,18 +21,37 @@ private:
     std::set<std::string> keyColumns;//实体类主键列
 
 public:
-    //属性与字段信息
-    EntityTableMap(const EntityTable &entityTable, const std::vector<EntityColumn> &propertyColumns) {
-        this->entityTable = entityTable;
-//        this->propertyMap = propertyColumns;
-    }
 
     const EntityTable &getEntityTable() const {
         return entityTable;
     }
 
-    const std::map<std::string, EntityColumn> &getPropertyMap() const {
+    void setEntityTable(const EntityTable &entityTable) {
+        EntityTableMap::entityTable = entityTable;
+    }
+
+    std::map<std::string, EntityColumn> &getPropertyMap() {
         return propertyMap;
+    }
+
+    void setPropertyMap(const std::map<std::string, EntityColumn> &propertyMap) {
+        EntityTableMap::propertyMap = propertyMap;
+    }
+
+    const std::set<std::string> &getKeyProperties() const {
+        return keyProperties;
+    }
+
+    void setKeyProperties(const std::set<std::string> &keyProperties) {
+        EntityTableMap::keyProperties = keyProperties;
+    }
+
+    const std::set<std::string> &getKeyColumns() const {
+        return keyColumns;
+    }
+
+    void setKeyColumns(const std::set<std::string> &keyColumns) {
+        EntityTableMap::keyColumns = keyColumns;
     }
 
 };

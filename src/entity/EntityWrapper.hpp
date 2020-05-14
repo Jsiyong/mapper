@@ -19,7 +19,7 @@ public:
      * 获取实体类的反射信息
      * @param entity
      */
-    std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<Entity> entity) {
+    void *getReflectionInfo(std::shared_ptr<Entity> entity) {
         return nullptr;
     }
 };

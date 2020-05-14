@@ -7,6 +7,7 @@
 
 #include <string>
 #include <memory>
+#include <tuple>
 #include "EntityWrapper.hpp"
 #include "EntityColumn.hpp"
 #include "EntityTableMap.hpp"
@@ -24,15 +25,12 @@ public:
      * 获取实体类的反射信息
      * @param entity
      */
-    std::shared_ptr<EntityTableMap> getReflectionInfo(std::shared_ptr<User> entity) {
-        return std::make_shared<EntityTableMap>(
-                 EntityTable("User", "user"),
-                std::vector<EntityColumn>({
-                                                  EntityColumn(&entity->id, "id", "id"),
-                                                  EntityColumn(&entity->name, "name", "name")
-                                            })
+    auto getReflectionInfo(std::shared_ptr<User> entity) {
+        return std::make_tuple(
+                EntityTable("User", "user"),
+                std::make_pair(&User::id, EntityColumn(&entity->id, "id", "id")),
+                std::make_pair(&User::name, EntityColumn(&entity->name, "name", "name"))
         );
-
     }
 };
 

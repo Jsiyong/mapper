@@ -9,6 +9,7 @@
 #include <vector>
 #include <builder/SQLBuilder.hpp>
 #include <util/ExampleHelper.hpp>
+#include <util/EntityHelper.hpp>
 #include "Criteria.hpp"
 #include "EntityWrapper.hpp"
 
@@ -52,7 +53,9 @@ public:
      * 初始化获取数据
      */
     Example() {
-        auto resultMap = EntityWrapper<Entity>().getReflectionInfo(entityClass);
+        std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
+        auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entityClass);
+        EntityHelper::getResultMap(reflectionInfo, resultMap);
         this->table = resultMap->getEntityTable();
         this->propertyMap = resultMap->getPropertyMap();
     }
