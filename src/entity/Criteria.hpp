@@ -12,6 +12,7 @@
 #include <MapperException.hpp>
 #include "Criterion.hpp"
 #include "EntityColumn.hpp"
+#include "util/EntityHelper.hpp"
 
 /**
  * 通用Example的标准的集合
@@ -41,6 +42,32 @@ private:
             throw MapperException("[property]" + property + "is not exist!");
         }
     }
+
+    /**
+     *
+     * @tparam P 属性类型,可以是成员在对象中的偏移量
+     * @param property
+     * @param compareSql
+     * @return
+     */
+    std::string condition(const std::string &property, const std::string &compareSql) {
+        return column(property) + " " + compareSql;
+    }
+
+    /**
+     * 可以通过成员在对象中的偏移量获取
+     * @tparam T
+     * @tparam Entity
+     * @param propertyPtr
+     * @param compareSql
+     * @return
+     */
+    template<typename T, typename Entity>
+    std::string condition(T Entity::* propertyPtr, const std::string &compareSql) {
+        auto property = EntityHelper::getProperty(propertyPtr);
+        return condition(property, compareSql);
+    }
+
 
     /**
      * 判断属性值是否存在等
@@ -73,83 +100,100 @@ public:
 
 public:
     ////////////////////// and ///////////////////////////////
-    Criteria *andIsNull(const std::string &property) {
-        criteria.emplace_back(Criterion(column(property) + " IS NULL"));
+    template<typename Property>
+    Criteria *andIsNull(const Property &property) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IS_NULL)));
         return this;
     }
 
-    Criteria *andIsNotNull(const std::string &property) {
-        criteria.emplace_back(Criterion(column(property) + " IS NOT NULL"));
+    template<typename Property>
+    Criteria *andIsNotNull(const Property &property) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IS_NOT_NULL)));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " =", value));
+    template<typename Property, typename Object>
+    Criteria *andEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::EQUALl_TO), value));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andNotEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <>", value));
+    template<typename Property, typename Object>
+    Criteria *andNotEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_EQUALl_TO), value));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andGreaterThan(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " >", value));
+    template<typename Property, typename Object>
+    Criteria *andGreaterThan(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN), value));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andGreaterThanOrEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " >=", value));
+    template<typename Property, typename Object>
+    Criteria *andGreaterThanOrEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN_OR_EQUAL_TO), value));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andLessThan(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <", value));
+    template<typename Property, typename Object>
+    Criteria *andLessThan(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN), value));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andLessThanOrEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <=", value));
+    template<typename Property, typename Object>
+    Criteria *andLessThanOrEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN_OR_EQUAL_TO), value));
         return this;
     }
 
-    template<typename Iterable>
-    Criteria *andIn(const std::string &property, const Iterable &values) {
-        criteria.emplace_back(Criterion(column(property) + " IN", values));
+    template<typename Property, typename Iterable>
+    Criteria *andIn(const Property &property, const Iterable &values) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IN), values));
         return this;
     }
 
-    template<typename Iterable>
-    Criteria *andNotIn(const std::string &property, const Iterable &values) {
-        criteria.emplace_back(Criterion(column(property) + " NOT IN", values));
+    template<typename Property, typename Iterable>
+    Criteria *andNotIn(const Property &property, const Iterable &values) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_IN), values));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andBetween(const std::string &property, const Object &value1, const Object &value2) {
-        criteria.emplace_back(Criterion(column(property) + " BETWEEN", value1, value2));
+    template<typename Property, typename Object>
+    Criteria *andBetween(const Property &property, const Object &value1, const Object &value2) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2));
         return this;
     }
 
-    template<typename Object>
-    Criteria *andNotBetween(const std::string &property, const Object &value1, const Object &value2) {
-        criteria.emplace_back(Criterion(column(property) + " NOT BETWEEN", value1, value2));
+    template<typename Property, typename Object>
+    Criteria *andNotBetween(const Property &property, const Object &value1, const Object &value2) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2));
         return this;
     }
 
-    Criteria *andLike(const std::string &property, std::string &value) {
-        criteria.emplace_back(Criterion(column(property) + " LIKE", value));
+    template<typename Property>
+    Criteria *andLike(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LIKE), value));
         return this;
     }
 
-    Criteria *andNotLike(const std::string &property, std::string &value) {
-        criteria.emplace_back(Criterion(column(property) + " NOT LIKE", value));
+    template<typename Property>
+    Criteria *andNotLike(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_LIKE), value));
+        return this;
+    }
+
+
+    template<typename Property>
+    Criteria *andRegexp(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::REGEXP), value));
+        return this;
+    }
+
+    template<typename Property>
+    Criteria *andNotRegexp(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_REGEXP), value));
         return this;
     }
 
@@ -178,83 +222,99 @@ public:
     }
 
     ////////////////////// or ///////////////////////////////
-    Criteria *orIsNull(const std::string &property) {
-        criteria.emplace_back(Criterion(column(property) + " IS NULL", true));
+    template<typename Property>
+    Criteria *orIsNull(const Property &property) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IS_NULL), true));
         return this;
     }
 
-    Criteria *orIsNotNull(const std::string &property) {
-        criteria.emplace_back(Criterion(column(property) + " IS NOT NULL", true));
+    template<typename Property>
+    Criteria *orIsNotNull(const Property &property) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IS_NOT_NULL), true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " =", value, true));
+    template<typename Property, typename Object>
+    Criteria *orEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::EQUALl_TO), value, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orNotEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <>", value, true));
+    template<typename Property, typename Object>
+    Criteria *orNotEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_EQUALl_TO), value, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orGreaterThan(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " >", value, true));
+    template<typename Property, typename Object>
+    Criteria *orGreaterThan(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN), value, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orGreaterThanOrEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " >=", value, true));
+    template<typename Property, typename Object>
+    Criteria *orGreaterThanOrEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN_OR_EQUAL_TO), value, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orLessThan(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <", value, true));
+    template<typename Property, typename Object>
+    Criteria *orLessThan(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN), value, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orLessThanOrEqualTo(const std::string &property, const Object &value) {
-        criteria.emplace_back(Criterion(column(property) + " <=", value, true));
+    template<typename Property, typename Object>
+    Criteria *orLessThanOrEqualTo(const Property &property, const Object &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN_OR_EQUAL_TO), value, true));
         return this;
     }
 
-    template<typename Iterable>
-    Criteria *orIn(const std::string &property, const Iterable &values) {
-        criteria.emplace_back(Criterion(column(property) + " IN", values, true));
+    template<typename Property, typename Iterable>
+    Criteria *orIn(const Property &property, const Iterable &values) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::IN), values, true));
         return this;
     }
 
-    template<typename Iterable>
-    Criteria *orNotIn(const std::string &property, const Iterable &values) {
-        criteria.emplace_back(Criterion(column(property) + " NOT IN", values, true));
+    template<typename Property, typename Iterable>
+    Criteria *orNotIn(const Property &property, const Iterable &values) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_IN), values, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orBetween(const std::string &property, const Object &value1, const Object &value2) {
-        criteria.emplace_back(Criterion(column(property) + " BETWEEN", value1, value2, true));
+    template<typename Property, typename Object>
+    Criteria *orBetween(const Property &property, const Object &value1, const Object &value2) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2, true));
         return this;
     }
 
-    template<typename Object>
-    Criteria *orNotBetween(const std::string &property, const Object &value1, const Object &value2) {
-        criteria.emplace_back(Criterion(column(property) + " NOT BETWEEN", value1, value2, true));
+    template<typename Property, typename Object>
+    Criteria *orNotBetween(const Property &property, const Object &value1, const Object &value2) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2, true));
         return this;
     }
 
-    Criteria *orLike(const std::string &property, std::string &value) {
-        criteria.emplace_back(Criterion(column(property) + " LIKE", value, true));
+    template<typename Property>
+    Criteria *orLike(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::LIKE), value, true));
         return this;
     }
 
-    Criteria *orNotLike(const std::string &property, std::string &value) {
-        criteria.emplace_back(Criterion(column(property) + " NOT LIKE", value, true));
+    template<typename Property>
+    Criteria *orNotLike(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_LIKE), value, true));
+        return this;
+    }
+
+    template<typename Property>
+    Criteria *orRegexp(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::REGEXP), value, true));
+        return this;
+    }
+
+    template<typename Property>
+    Criteria *orNotRegexp(const Property &property, std::string &value) {
+        criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_REGEXP), value, true));
         return this;
     }
 

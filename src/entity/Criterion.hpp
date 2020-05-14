@@ -7,7 +7,7 @@
 
 #include <string>
 #include <util/TypeUtils.hpp>
-#include "Constants.hpp"
+#include "SQLConstants.hpp"
 
 /**
  * 通用的一个标准
@@ -23,9 +23,7 @@ private:
     bool singleValue = false;//是否是单值
     bool betweenValue = false;//是否是between
     bool listValue = false;//是否是列表值
-    int listSize = 0;//如果是列表,列表大小
-    std::string typeHandler;
-
+    CollectionInfo collectionInfo;//如果是列表,列表容器的信息
 public:
     const std::string &getCondition() const {
         return condition;
@@ -59,51 +57,41 @@ public:
         return listValue;
     }
 
-    const std::string &getTypeHandler() const {
-        return typeHandler;
-    }
-
-    int getListSize() const {
-        return listSize;
+    const CollectionInfo &getCollectionInfo() const {
+        return collectionInfo;
     }
 
 public:
 
     template<typename Object>
-    Criterion(const std::string &condition, const Object &value, const Object &secondValue,
-              const std::string &typeHandler, bool isOr) {
+    Criterion(const std::string &condition, const Object &value, const Object &secondValue, bool isOr = false) {
         this->condition = condition;
         this->value = (void *) &value;
         this->secondValue = (void *) &secondValue;
-        this->typeHandler = typeHandler;
         this->betweenValue = true;
-        this->andOr = isOr ? Constants::OR : Constants::AND;
+        this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
     }
 
     template<typename Object>
-    Criterion(const std::string &condition, const Object &value, const std::string &typeHandler, bool isOr = false) {
+    Criterion(const std::string &condition, const Object &value, bool isOr = false) {
         this->condition = condition;
         this->value = (void *) &value;
-        this->typeHandler = typeHandler;
-        this->andOr = isOr ? Constants::OR : Constants::AND;
+        this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
         //判断是不是集合类型
-        if (TypeUtils::isCollection(value, this->listSize)) {
+        auto listInfo = TypeUtils::getCollectionInfo(value);
+        if (listInfo.getCollectionType() != CollectionInfo::CollectionType::Null) {
             this->listValue = true;
-// TODO           this->listSize = value.size();
+            this->collectionInfo = listInfo;
+            this->collectionInfo.setValue(this->value);
         } else {
             this->singleValue = true;
         }
     }
 
-    template<typename Object>
-    Criterion(const std::string &condition, const Object &value, bool isOr = false) {
-        new(this)Criterion(condition, value, std::move(std::string()), isOr);
-    }
-
     explicit Criterion(const std::string &condition, bool isOr = false) {
         this->condition = condition;
         this->noValue = true;
-        this->andOr = isOr ? Constants::OR : Constants::AND;
+        this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
     }
 };
 

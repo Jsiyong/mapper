@@ -20,11 +20,15 @@ int main() {
 
     Example<User> example;
     auto item1 = example.createCriteria();
-    item1->andIn("id", std::set<int>({1, 2, 3}));
+
+    item1->andIn(&User::id, std::set<int>({1, 2, 3}));
     item1->andEqualTo("id", 2);
+
     auto item2 = example.createCriteria();
     item2->andBetween("name", "123", "456");
+    item2->orGreaterThan(&User::name, "23");
     example.orCriteria(item2);
+
     auto res = example.getSelectByExample();
 
 

@@ -8,6 +8,7 @@
 #include <vector>
 #include <set>
 #include <list>
+#include <entity/CollectionInfo.hpp>
 
 /**
  * 类型工具类
@@ -22,26 +23,23 @@ public:
      * @return
      */
     template<typename T>
-    static bool isCollection(const std::vector<T> &t, int &size) {
-        size = t.size();
-        return true;
+    static CollectionInfo getCollectionInfo(const std::vector<T> &t) {
+        return CollectionInfo(CollectionInfo::CollectionType::Vector, t.size());
     }
 
     template<typename T>
-    static bool isCollection(const std::set<T> &t, int &size) {
-        size = t.size();
-        return true;
+    static CollectionInfo getCollectionInfo(const std::set<T> &t) {
+        return CollectionInfo(CollectionInfo::CollectionType::Set, t.size());
     }
 
     template<typename T>
-    static bool isCollection(const std::list<T> &t, int &size) {
-        size = t.size();
-        return true;
+    static CollectionInfo getCollectionInfo(const std::list<T> &t) {
+        return CollectionInfo(CollectionInfo::CollectionType::List, t.size());
     }
 
     template<typename T>
-    static bool isCollection(const T &t, int &size) {
-        return false;
+    static CollectionInfo getCollectionInfo(const T &t) {
+        return {};
     }
 
 };

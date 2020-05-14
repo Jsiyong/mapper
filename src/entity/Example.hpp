@@ -40,7 +40,7 @@ public:
         sqlBuilder->FROM(table.getTableName());
         for (auto &i : oredCriteria) {
             auto conditions = ExampleHelper::getConditionFromCriteria(*i);
-            if (i->getAndOr() == Constants::OR) {
+            if (i->getAndOr() == SQLConstants::OR) {
                 sqlBuilder->OR();
             }
             sqlBuilder->WHERE(conditions);
@@ -67,7 +67,7 @@ public:
     std::shared_ptr<Criteria> createCriteria() {
         auto criteria = createCriteriaInternal();
         if (oredCriteria.empty()) {
-            criteria->setAndOr(Constants::AND);
+            criteria->setAndOr(SQLConstants::AND);
             oredCriteria.emplace_back(criteria);
         }
         return criteria;
@@ -78,7 +78,7 @@ public:
      * @param criteria
      */
     void orCriteria(std::shared_ptr<Criteria> criteria) {
-        criteria->setAndOr(Constants::OR);
+        criteria->setAndOr(SQLConstants::OR);
         oredCriteria.emplace_back(criteria);
     }
 
@@ -88,7 +88,7 @@ public:
     */
     std::shared_ptr<Criteria> orCriteria() {
         auto criteria = createCriteriaInternal();
-        criteria->setAndOr(Constants::OR);
+        criteria->setAndOr(SQLConstants::OR);
         oredCriteria.emplace_back(criteria);
         return criteria;
     }
@@ -98,7 +98,7 @@ public:
      * @param criteria
      */
     void andCriteria(std::shared_ptr<Criteria> criteria) {
-        criteria->setAndOr(Constants::AND);
+        criteria->setAndOr(SQLConstants::AND);
         oredCriteria.emplace_back(criteria);
     }
 
@@ -108,7 +108,7 @@ public:
     */
     std::shared_ptr<Criteria> andCriteria() {
         auto criteria = createCriteriaInternal();
-        criteria->setAndOr(Constants::AND);
+        criteria->setAndOr(SQLConstants::AND);
         oredCriteria.emplace_back(criteria);
         return criteria;
     }

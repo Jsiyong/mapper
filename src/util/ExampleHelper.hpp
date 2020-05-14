@@ -31,11 +31,11 @@ public:
             answer += " ?";
         }
         if (criterion.isBetweenValue()) {
-            answer += " ? " + Constants::AND + " ?";
+            answer += " ? " + SQLConstants::AND + " ?";
         }
         if (criterion.isListValue()) {
             answer += " (";
-            for (int i = 0; i < criterion.getListSize(); ++i) {
+            for (int i = 0; i < criterion.getCollectionInfo().getSize(); ++i) {
                 answer += 0 == i ? " ?" : " ,?";
             }
             answer += " )";
@@ -48,7 +48,7 @@ public:
         auto &cria = criteria.getCriteria();
         for (int i = 0; i < cria.size(); ++i) {
             auto condition = getConditionFromCriterion(cria[i]);
-            answer += 0 == i ? condition : cria[i].getAndOr() + " " + condition;
+            answer += 0 == i ? condition : " " + cria[i].getAndOr() + " " + condition;
         }
         return answer;
     }
