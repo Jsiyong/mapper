@@ -13,6 +13,11 @@
 #include <entity/Example.hpp>
 
 int main() {
+
+    auto name_ = EntityHelper::getProperty(&User::name);
+    auto id_ = EntityHelper::getProperty(&User::id);
+
+
     Example<User> example;
     auto item1 = example.createCriteria();
     item1->andIn("id", std::set<int>({1, 2, 3}));

@@ -18,6 +18,7 @@
  */
 class Criteria {
 private:
+
     std::vector<Criterion> criteria;//标准的集合
     //属性和列对应
     std::map<std::string, EntityColumn> *propertyMap = nullptr;
