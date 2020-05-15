@@ -77,19 +77,24 @@ private:
         template<typename T>
         static void bind2ResultMap(const T &t, std::shared_ptr<EntityTableMap> resultMap) {}
 
-        //获取EntityTable
+        //获取EntityTable,并加入表格中
         static void bind2ResultMap(const EntityTable &entityTable, std::shared_ptr<EntityTableMap> resultMap) {
-            resultMap->setEntityTable(entityTable);
+            resultMap->getEntityTables().emplace_back(entityTable);
         }
 
         //获取实体字段到表格列的映射
-        template<typename T>
-        static void bind2ResultMap(const std::pair<T, EntityColumn> &pair, std::shared_ptr<EntityTableMap> resultMap) {
+        template<typename R, typename T>
+        static void
+        bind2ResultMap(const std::pair<R T::*, EntityColumn> &pair, std::shared_ptr<EntityTableMap> resultMap) {
             auto &propertyMap = resultMap->getPropertyMap();
             propertyMap.insert(std::make_pair(pair.second.getProperty(), pair.second));
+            //递归查找其他关联类型的resultMap
+            auto relatedEntity = std::make_shared<R>();
+            //关联的反射信息
+            auto relatedReflectionInfo = EntityWrapper<R>().getReflectionInfo(relatedEntity);
+            //递归获取结果集映射关系
+            EntityHelper::getResultMap(relatedReflectionInfo, resultMap);
         }
-
-
     };
 
     template<typename Tuple>
@@ -107,6 +112,15 @@ private:
         ResultGetter<decltype(tuple), sizeof...(Args)>::getProperty(tuple, t, res);
         return res;
     }
+
+    /**
+     * 这个空的是故意的,专门用来忽略无效的对象
+     * @tparam T
+     * @param t
+     * @param resultMap
+     */
+    template<typename T>
+    static void getResultMap(const T &t, std::shared_ptr<EntityTableMap> resultMap) {}
 
 public:
 

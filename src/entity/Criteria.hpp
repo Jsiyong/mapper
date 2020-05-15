@@ -173,13 +173,13 @@ public:
     }
 
     template<typename Property>
-    Criteria *andLike(const Property &property, std::string &value) {
+    Criteria *andLike(const Property &property, const std::string &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::LIKE), value));
         return this;
     }
 
     template<typename Property>
-    Criteria *andNotLike(const Property &property, std::string &value) {
+    Criteria *andNotLike(const Property &property, const std::string &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_LIKE), value));
         return this;
     }

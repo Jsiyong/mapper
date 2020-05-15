@@ -56,7 +56,7 @@ public:
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
         auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entityClass);
         EntityHelper::getResultMap(reflectionInfo, resultMap);
-        this->table = resultMap->getEntityTable();
+        this->table = resultMap->getEntityTables()[0];
         this->propertyMap = resultMap->getPropertyMap();
     }
 

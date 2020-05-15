@@ -15,19 +15,19 @@
  */
 class EntityTableMap {
 private:
-    EntityTable entityTable;//实体类与表格信息
+    std::vector<EntityTable> entityTables;//实体类与表格信息,可能会连表,所以需要保存多个映射关系
     std::map<std::string, EntityColumn> propertyMap;//属性和列对应
     std::set<std::string> keyProperties; //实体类主键属性
     std::set<std::string> keyColumns;//实体类主键列
 
 public:
 
-    const EntityTable &getEntityTable() const {
-        return entityTable;
+    std::vector<EntityTable> &getEntityTables() {
+        return entityTables;
     }
 
-    void setEntityTable(const EntityTable &entityTable) {
-        EntityTableMap::entityTable = entityTable;
+    void setEntityTables(const std::vector<EntityTable> &entityTables) {
+        EntityTableMap::entityTables = entityTables;
     }
 
     std::map<std::string, EntityColumn> &getPropertyMap() {

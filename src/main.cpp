@@ -14,15 +14,20 @@
 
 int main() {
 
-    auto name_ = EntityHelper::getProperty(&User::name);
-    auto id_ = EntityHelper::getProperty(&User::id);
+//    auto name_ = EntityHelper::getProperty(&User::name);
+//    auto id_ = EntityHelper::getProperty(&User::id);
 
 
+//    auto b = &User::id;
+//    auto a = &User::team;
     Example<User> example;
     auto item1 = example.createCriteria();
 
     item1->andIn(&User::id, std::set<int>({1, 2, 3}));
     item1->andEqualTo("id", 2);
+    item1->andIsNull("teamId");
+    item1->andEqualTo(&Team::teamName, "abc");
+    item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
 
     auto item2 = example.createCriteria();
     item2->andBetween("name", "123", "456");
