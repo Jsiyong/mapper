@@ -106,6 +106,7 @@ private:
     };
 
 
+    //获取属性字符串的实现
     template<typename... Args, typename T>
     static std::string getProperty(const std::tuple<Args...> &tuple, T t) {
         std::string res;

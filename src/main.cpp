@@ -25,7 +25,7 @@ int main() {
 
     item1->andIn(&User::id, std::set<int>({1, 2, 3}));
     item1->andEqualTo("id", 2);
-    item1->andIsNull("teamId");
+    item1->orIsNull("teamId");
     item1->andEqualTo(&Team::teamName, "abc");
     item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
 

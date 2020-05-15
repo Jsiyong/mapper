@@ -22,7 +22,7 @@ private:
     std::vector<std::shared_ptr<Criteria>> oredCriteria;//标准列表
     std::map<std::string, EntityColumn> propertyMap; //属性和列对应
     std::shared_ptr<Entity> entityClass = std::make_shared<Entity>();//实体类
-    EntityTable table;//该实体类对应的表
+    std::vector<EntityTable> tables;//该实体类对应的表列表
 
 private:
     std::shared_ptr<Criteria> createCriteriaInternal() {
@@ -34,16 +34,17 @@ public:
 
     std::string getSelectByExample() {
         auto sqlBuilder = std::make_shared<SQLBuilder>();
-        for (auto &p:propertyMap) {
+        for (const auto &p:propertyMap) {
             sqlBuilder->SELECT(p.second.getColumn());
         }
-        sqlBuilder->FROM(table.getTableName());
-        for (auto &i : oredCriteria) {
-            auto conditions = ExampleHelper::getConditionFromCriteria(*i);
-            if (i->getAndOr() == SQLConstants::OR) {
+        for (const auto &t:tables) {
+            sqlBuilder->FROM(t.getTableName());
+        }
+        for (auto &criteria : oredCriteria) {
+            if (criteria->getAndOr() == SQLConstants::OR) {
                 sqlBuilder->OR();
             }
-            sqlBuilder->WHERE(conditions);
+            sqlBuilder->WHERE(ExampleHelper::getConditionFromCriteria(*criteria));
         }
         return sqlBuilder->toString();
     }
@@ -56,7 +57,7 @@ public:
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
         auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entityClass);
         EntityHelper::getResultMap(reflectionInfo, resultMap);
-        this->table = resultMap->getEntityTables()[0];
+        this->tables = resultMap->getEntityTables();
         this->propertyMap = resultMap->getPropertyMap();
     }
 

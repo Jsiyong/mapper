@@ -43,11 +43,17 @@ public:
         return answer;
     }
 
+    /**
+     * 从多个小准则中获取sql语句
+     * @param criteria
+     * @return
+     */
     static std::string getConditionFromCriteria(const Criteria &criteria) {
         std::string answer;
         auto &cria = criteria.getCriteria();
         for (int i = 0; i < cria.size(); ++i) {
             auto condition = getConditionFromCriterion(cria[i]);
+            //列表第一个要忽略and和or的判断
             answer += 0 == i ? condition : " " + cria[i].getAndOr() + " " + condition;
         }
         return answer;
