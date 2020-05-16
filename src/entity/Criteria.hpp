@@ -69,18 +69,18 @@ private:
     }
 
 
-    /**
-     * 判断属性值是否存在等
-     * @param property
-     * @return
-     */
-    const std::string &property(const std::string &property) const {
-        if (propertyMap->count(property) > 0) {
-            return property;
-        } else {
-            throw MapperException("[property]" + property + "is not exist!");
-        }
-    }
+//    /**
+//     * 判断属性值是否存在等
+//     * @param property
+//     * @return
+//     */
+//    const std::string &property(const std::string &property) const {
+//        if (propertyMap->count(property) > 0) {
+//            return property;
+//        } else {
+//            throw MapperException("[property]" + property + "is not exist!");
+//        }
+//    }
 
 public:
     explicit Criteria(std::map<std::string, EntityColumn> *propertyMap, EntityTable *table)

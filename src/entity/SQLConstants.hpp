@@ -34,5 +34,11 @@ namespace SQLConstants {
 
     const static std::string REGEXP = "REGEXP";
     const static std::string NOT_REGEXP = "NOT REGEXP";
+
+    const static std::string AS = "AS";
+    const static std::string DESC = "DESC";
+    const static std::string ASC = "ASC";
+
+    const static std::string ON = "ON";
 }
 #endif //MAPPER_SQLCONSTANTS_HPP

@@ -13,6 +13,7 @@
 #include "Criteria.hpp"
 #include "EntityWrapper.hpp"
 #include "JoinEntityTable.hpp"
+#include "OrderBy.hpp"
 
 /**
  * 通用的Example查询对象
@@ -27,6 +28,7 @@ private:
     std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
     std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
 
+    std::shared_ptr<OrderBy> orderBy = nullptr;//排序的
 
 private:
     std::shared_ptr<Criteria> createCriteriaInternal() {
@@ -54,18 +56,27 @@ public:
         auto sqlBuilder = std::make_shared<SQLBuilder>();
         for (const auto &p:propertyMap) {
             //用别名
-            sqlBuilder->SELECT(p.second.getColumn() + " AS " + p.second.getAlias());
+            sqlBuilder->SELECT(p.second.getColumn() + " " + SQLConstants::AS + " " + p.second.getAlias());
         }
         //表也要用别名
-        sqlBuilder->FROM(table.getTableName() + " AS " + table.getAlias());
+        sqlBuilder->FROM(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
         //处理外连接
         for (const auto &jt:joinTableMap) {
             sqlBuilder->LEFT_OUTER_JOIN(
-                    jt.second.getTableName() + " AS " + jt.second.getAlias() + " ON " + jt.second.getJoinColumn() +
-                    " = " + jt.second.getJoinedColumn());
+                    jt.second.getTableName() + " " + SQLConstants::AS + " " + jt.second.getAlias()
+                    + " " + SQLConstants::ON + " " + jt.second.getJoinColumn() + " " + SQLConstants::EQUALl_TO + " " +
+                    jt.second.getJoinedColumn()
+            );
         }
         //处理条件
         buildOredCriteria(sqlBuilder);
+        //处理排序
+        if (orderBy) {
+            for (auto &o: orderBy->getOrderBys()) {
+                sqlBuilder->ORDER_BY(o);
+            }
+        }
+
         return sqlBuilder->toString();
     }
 
@@ -162,6 +173,24 @@ public:
         criteria->setAndOr(SQLConstants::AND);
         oredCriteria.emplace_back(criteria);
         return criteria;
+    }
+
+    //降序
+    template<typename R, typename T>
+    std::shared_ptr<OrderBy> orderByDesc(R T::* t) {
+        if (orderBy == nullptr) {
+            orderBy = std::make_shared<OrderBy>(&propertyMap);
+        }
+        return orderBy->desc(t);
+    }
+
+    //升序
+    template<typename R, typename T>
+    std::shared_ptr<OrderBy> orderByAsc(R T::* t) {
+        if (orderBy == nullptr) {
+            orderBy = std::make_shared<OrderBy>(&propertyMap);
+        }
+        return orderBy->asc(t);
     }
 };
 

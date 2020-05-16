@@ -40,7 +40,8 @@ int main() {
     item2->andBetween(&User::name, "123", "456");
     item2->orGreaterThan(&User::name, "23");
     example.orCriteria(item2);
-
+    example.orderByAsc(&User::name);
+    example.orderByDesc(&Team::teamId);
     auto res = example.getSelectByExample();
 
 
