@@ -43,16 +43,16 @@ private:
         }
     }
 
-    /**
-     * 属性类型,可以是成员在对象中的偏移量
-     * @param property
-     * @param compareSql
-     * @param isOffsetType 是否是偏移量类型: &A::a
-     * @return
-     */
-    std::string condition(const std::string &property, const std::string &compareSql, bool isOffsetType = false) {
-        return column(isOffsetType ? property : this->table->getAlias() + "." + property) + " " + compareSql;
-    }
+//    /**
+//     * 属性类型,可以是成员在对象中的偏移量
+//     * @param property
+//     * @param compareSql
+//     * @param isOffsetType 是否是偏移量类型: &A::a
+//     * @return
+//     */
+//    std::string condition(const std::string &property, const std::string &compareSql, bool isOffsetType = false) {
+//        return column(isOffsetType ? property : this->table->getAlias() + "." + property) + " " + compareSql;
+//    }
 
     /**
      * 可以通过成员在对象中的偏移量获取
@@ -65,7 +65,7 @@ private:
     template<typename T, typename Entity>
     std::string condition(T Entity::* propertyPtr, const std::string &compareSql) {
         auto property = EntityHelper::getProperty(propertyPtr);
-        return condition(property, compareSql, true);
+        return column(property) + " " + compareSql;
     }
 
 
