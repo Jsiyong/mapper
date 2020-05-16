@@ -7,8 +7,10 @@
 
 #include <vector>
 #include <set>
-#include "EntityTable.hpp"
-#include "EntityColumn.hpp"
+
+class EntityColumn;
+
+class EntityTable;
 
 /**
  * 实体类和表格映射信息

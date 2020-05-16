@@ -11,8 +11,15 @@
 #include <util/StringUtils.hpp>
 #include <util/TypeUtils.hpp>
 #include <entity/Example.hpp>
+#include <util/AliasHelper.hpp>
 
 int main() {
+
+    auto u1 = AliasHelper::getAliasFromType<User>();
+    auto u2 = AliasHelper::getAliasFromType<User>();
+    auto u3 = AliasHelper::getAliasFromType<Team>();
+    auto u4 = AliasHelper::getAliasFromType<User>();
+    auto u5 = AliasHelper::getAliasFromType<Team>();
 
 //    auto name_ = EntityHelper::getProperty(&User::name);
 //    auto id_ = EntityHelper::getProperty(&User::id);
@@ -25,7 +32,7 @@ int main() {
 
     item1->andIn(&User::id, std::set<int>({1, 2, 3}));
     item1->andEqualTo("id", 2);
-    item1->orIsNull("teamId");
+    item1->orIsNull("team");
     item1->andEqualTo(&Team::teamName, "abc");
     item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
 

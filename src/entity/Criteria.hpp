@@ -25,6 +25,7 @@ private:
     std::map<std::string, EntityColumn> *propertyMap = nullptr;
     //连接条件
     std::string andOr;
+    EntityTable *table = nullptr;//该实体类对应的表
 
 private:
 
@@ -35,8 +36,7 @@ private:
      */
     std::string column(const std::string &property) const {
         if (propertyMap->count(property) > 0) {
-            //返回实体类列名
-            return propertyMap->at(property).getColumn();
+            return propertyMap->at(property).getColumnWithTableAlias();
         } else {
             //属性不存在,抛异常
             throw MapperException("[property]" + property + "is not exist!");
@@ -44,14 +44,14 @@ private:
     }
 
     /**
-     *
-     * @tparam P 属性类型,可以是成员在对象中的偏移量
+     * 属性类型,可以是成员在对象中的偏移量
      * @param property
      * @param compareSql
+     * @param isOffsetType 是否是偏移量类型: &A::a
      * @return
      */
-    std::string condition(const std::string &property, const std::string &compareSql) {
-        return column(property) + " " + compareSql;
+    std::string condition(const std::string &property, const std::string &compareSql, bool isOffsetType = false) {
+        return column(isOffsetType ? property : this->table->getAlias() + "." + property) + " " + compareSql;
     }
 
     /**
@@ -65,7 +65,7 @@ private:
     template<typename T, typename Entity>
     std::string condition(T Entity::* propertyPtr, const std::string &compareSql) {
         auto property = EntityHelper::getProperty(propertyPtr);
-        return condition(property, compareSql);
+        return condition(property, compareSql, true);
     }
 
 
@@ -83,8 +83,8 @@ private:
     }
 
 public:
-    explicit Criteria(std::map<std::string, EntityColumn> *propertyMap)
-            : propertyMap(propertyMap) {}
+    explicit Criteria(std::map<std::string, EntityColumn> *propertyMap, EntityTable *table)
+            : propertyMap(propertyMap), table(table) {}
 
     void setAndOr(const std::string &andOr) {
         this->andOr = andOr;

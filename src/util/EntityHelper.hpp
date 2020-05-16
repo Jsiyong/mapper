@@ -6,10 +6,11 @@
 #define MAPPER_ENTITYHELPER_HPP
 
 #include <tuple>
-#include <entity/EntityTableMap.hpp>
 #include <memory>
 #include <map>
+#include <entity/EntityTableMap.hpp>
 #include <entity/EntityWrapper.hpp>
+
 
 /**
  * 帮助实体外包类提取出信息
@@ -54,7 +55,7 @@ private:
 
         template<typename T>
         static std::string getProperty(std::pair<T, EntityColumn> pair) {
-            return pair.second.getColumn();
+            return pair.second.getProperty();
         }
 
         //偏移量是否匹配得上属性
@@ -87,6 +88,7 @@ private:
         static void
         bind2ResultMap(const std::pair<R T::*, EntityColumn> &pair, std::shared_ptr<EntityTableMap> resultMap) {
             auto &propertyMap = resultMap->getPropertyMap();
+            //注意!!! 成员属性中已经加入了别名了"别名.属性名"
             propertyMap.insert(std::make_pair(pair.second.getProperty(), pair.second));
             //递归查找其他关联类型的resultMap
             auto relatedEntity = std::make_shared<R>();

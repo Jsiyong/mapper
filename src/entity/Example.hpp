@@ -12,6 +12,7 @@
 #include <util/EntityHelper.hpp>
 #include "Criteria.hpp"
 #include "EntityWrapper.hpp"
+#include "JoinEntityTable.hpp"
 
 /**
  * 通用的Example查询对象
@@ -20,32 +21,51 @@ template<typename Entity>
 class Example {
 private:
     std::vector<std::shared_ptr<Criteria>> oredCriteria;//标准列表
-    std::map<std::string, EntityColumn> propertyMap; //属性和列对应
+    std::map<std::string, EntityColumn> propertyMap; //属性和列对应,是所有的,包括连接出来的
     std::shared_ptr<Entity> entityClass = std::make_shared<Entity>();//实体类
-    std::vector<EntityTable> tables;//该实体类对应的表列表
+    EntityTable table;//该实体类对应的表
+    std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
+    std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
+
 
 private:
     std::shared_ptr<Criteria> createCriteriaInternal() {
         //传递属性列映射的指针进去
-        return std::make_shared<Criteria>(&propertyMap);
+        return std::make_shared<Criteria>(&propertyMap, &table);
     }
 
-public:
-
-    std::string getSelectByExample() {
-        auto sqlBuilder = std::make_shared<SQLBuilder>();
-        for (const auto &p:propertyMap) {
-            sqlBuilder->SELECT(p.second.getColumn());
-        }
-        for (const auto &t:tables) {
-            sqlBuilder->FROM(t.getTableName());
-        }
+    /**
+     * 合并OredCriteria
+     * @param sqlBuilder
+     */
+    void buildOredCriteria(std::shared_ptr<SQLBuilder> sqlBuilder) {
         for (auto &criteria : oredCriteria) {
             if (criteria->getAndOr() == SQLConstants::OR) {
                 sqlBuilder->OR();
             }
             sqlBuilder->WHERE(ExampleHelper::getConditionFromCriteria(*criteria));
         }
+    }
+
+
+public:
+
+    std::string getSelectByExample() {
+        auto sqlBuilder = std::make_shared<SQLBuilder>();
+        for (const auto &p:propertyMap) {
+            //用别名
+            sqlBuilder->SELECT(p.second.getColumn() + " AS " + p.second.getAlias());
+        }
+        //表也要用别名
+        sqlBuilder->FROM(table.getTableName() + " AS " + table.getAlias());
+        //处理外连接
+        for (const auto &jt:joinTableMap) {
+            sqlBuilder->LEFT_OUTER_JOIN(
+                    jt.second.getTableName() + " AS " + jt.second.getAlias() + " ON " + jt.second.getJoinColumn() +
+                    " = " + jt.second.getJoinedColumn());
+        }
+        //处理条件
+        buildOredCriteria(sqlBuilder);
         return sqlBuilder->toString();
     }
 
@@ -57,8 +77,38 @@ public:
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
         auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entityClass);
         EntityHelper::getResultMap(reflectionInfo, resultMap);
-        this->tables = resultMap->getEntityTables();
-        this->propertyMap = resultMap->getPropertyMap();
+        //拆分表信息
+        for (auto &t: resultMap->getEntityTables()) {
+            //若当前类的别名和t的别名一致,说明是当前类,否则是关联的类
+            if (AliasHelper::getAliasFromType<Entity>() == t.getAlias()) {
+                this->table = t;
+            } else {
+                this->joinTableMap.insert(std::make_pair(t.getAlias(), t));
+            }
+        }
+        //拆分实体列的信息
+        for (auto &r :resultMap->getPropertyMap()) {
+            this->propertyMap.insert(r);
+            //找出连接属性是Join的,设置其连接信息
+            if (r.second.getJoinType() != JoinType::Null) {
+                //设置连表的连接属性
+                auto &joinTable = this->joinTableMap.at(r.second.getJoinTableAlias());
+                //设置被连接的表的属性,加上别名
+                joinTable.setJoinColumn(r.second.getColumnWithTableAlias());
+                joinTable.setJoinProperty(r.second.getProperty());
+                joinTable.setJoinAlias(r.second.getTableAlias());
+                joinTable.setJoinedProperty(r.second.getJoinProperty());
+            }
+            //被连接表的信息处理
+            if (AliasHelper::getAliasFromType<Entity>() == r.second.getTableAlias()) {
+                this->entityPropertyMap.insert(r);
+            }
+        }
+        //设置被连接表
+        for (auto &joinMap:joinTableMap) {
+            auto joinColumn = this->propertyMap.at(joinMap.second.getJoinedProperty()).getColumnWithTableAlias();
+            joinMap.second.setJoinedColumn(joinColumn);
+        }
     }
 
     /**

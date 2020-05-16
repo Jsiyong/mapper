@@ -38,4 +38,12 @@ enum class Style {
     CamelhumpAndLowercase//驼峰转下划线小写形式
 };
 
+/**
+ * 表格的关联关系,主表,关联表等
+ */
+enum class JoinType {
+    Null,//无连接,普通类型
+    LeftJoin//被左关联的表
+};
+
 #endif //MAPPER_ENTITYENUM_HPP

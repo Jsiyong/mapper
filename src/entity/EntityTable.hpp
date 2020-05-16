@@ -10,6 +10,9 @@
 #define MAPPER_ENTITYTABLE_HPP
 
 #include <string>
+#include <memory>
+#include <util/AliasHelper.hpp>
+
 
 /**
  * 实体类和表的映射关系
@@ -18,16 +21,19 @@ class EntityTable {
 private:
     std::string tableName;//表名
     std::string className;//类名
+    std::string alias;//数据库表的别名,为系统自动分配,默认生成的别名
 
 public:
     EntityTable() = default;
 
-    EntityTable(std::string tableName, std::string className)
+    template<typename T>
+    EntityTable(std::shared_ptr<T> t, std::string tableName, std::string className)
             : tableName(std::move(tableName)),
-              className(std::move(className)) {}
+              className(std::move(className)) {
+        alias = AliasHelper::getAliasFromType<T>();//别名
+    }
 
 public:
-
 
     const std::string &getClassName() const {
         return className;
@@ -35,6 +41,10 @@ public:
 
     const std::string &getTableName() const {
         return tableName;
+    }
+
+    const std::string &getAlias() const {
+        return alias;
     }
 
 
