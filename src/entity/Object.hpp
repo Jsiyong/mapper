@@ -12,7 +12,7 @@
 #include <list>
 
 /**
- * 简单包装一下any类型,方便之后取出来使用
+ * 简单包装一下Object类型,方便之后取出来使用
  */
 class Object {
 protected:

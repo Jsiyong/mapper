@@ -35,7 +35,7 @@ public:
         }
         if (criterion.isListValue()) {
             answer += " (";
-            for (int i = 0; i < criterion.getListSize(); ++i) {
+            for (int i = 0; i < criterion.getValues().size(); ++i) {
                 answer += 0 == i ? " ?" : " ,?";
             }
             answer += " )";

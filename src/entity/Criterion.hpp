@@ -22,7 +22,6 @@ private:
     bool singleValue = false;//是否是单值
     bool betweenValue = false;//是否是between
     bool listValue = false;//是否是列表值
-    int listSize = 0;//如果是容器列表值,列表的大小
 
 public:
     const std::string &getCondition() const {
@@ -53,10 +52,6 @@ public:
         return values;
     }
 
-    int getListSize() const {
-        return listSize;
-    }
-
 public:
 
     Criterion(const std::string &condition, const Object &value, const Object &secondValue, bool isOr = false) {
@@ -72,7 +67,6 @@ public:
         this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
         if (value.isContainer()) {
             this->listValue = true;
-            this->listSize = value.getValues().size();
             //一个个插入
             this->values.insert(this->values.end(), value.getValues().begin(), value.getValues().end());
         } else {
