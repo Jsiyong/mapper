@@ -24,8 +24,8 @@ private:
      * @return
      */
     template<typename Collection>
-    static std::vector<Any> getValuesFromCollection(const Collection &collection) {
-        std::vector<Any> results;
+    static std::vector<Object> getValuesFromCollection(const Collection &collection) {
+        std::vector<Object> results;
 //        results.insert(results.end(), collection.begin(), collection.end());
         for (const auto &c:collection) {
             results.emplace_back(c);

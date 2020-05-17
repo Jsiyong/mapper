@@ -13,6 +13,7 @@
 #include "Criterion.hpp"
 #include "EntityColumn.hpp"
 #include "util/EntityHelper.hpp"
+#include "Iterable.hpp"
 
 /**
  * 通用Example的标准的集合
@@ -112,62 +113,62 @@ public:
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::EQUALl_TO), value));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andNotEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_EQUALl_TO), value));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andGreaterThan(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN), value));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andGreaterThanOrEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN_OR_EQUAL_TO), value));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andLessThan(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN), value));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *andLessThanOrEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN_OR_EQUAL_TO), value));
         return this;
     }
 
-    template<typename Property, typename Iterable>
+    template<typename Property>
     Criteria *andIn(const Property &property, const Iterable &values) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::IN), values));
         return this;
     }
 
-    template<typename Property, typename Iterable>
+    template<typename Property>
     Criteria *andNotIn(const Property &property, const Iterable &values) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_IN), values));
         return this;
     }
 
-    template<typename Property, typename Object1, typename Object2>
-    Criteria *andBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
+    template<typename Property>
+    Criteria *andBetween(const Property &property, const Object &value1, const Object &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2));
         return this;
     }
 
-    template<typename Property, typename Object1, typename Object2>
-    Criteria *andNotBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
+    template<typename Property>
+    Criteria *andNotBetween(const Property &property, const Object &value1, const Object &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2));
         return this;
     }
@@ -215,7 +216,6 @@ public:
      * @param value     例如 5
      * @return
      */
-    template<typename Object>
     Criteria *andCondition(const std::string &condition, const Object &value) {
         criteria.emplace_back(Criterion(condition, value));
         return this;
@@ -234,62 +234,62 @@ public:
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::EQUALl_TO), value, true));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orNotEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_EQUALl_TO), value, true));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orGreaterThan(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN), value, true));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orGreaterThanOrEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::GREATER_THAN_OR_EQUAL_TO), value, true));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orLessThan(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN), value, true));
         return this;
     }
 
-    template<typename Property, typename Object>
+    template<typename Property>
     Criteria *orLessThanOrEqualTo(const Property &property, const Object &value) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::LESS_THAN_OR_EQUAL_TO), value, true));
         return this;
     }
 
-    template<typename Property, typename Iterable>
+    template<typename Property>
     Criteria *orIn(const Property &property, const Iterable &values) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::IN), values, true));
         return this;
     }
 
-    template<typename Property, typename Iterable>
+    template<typename Property>
     Criteria *orNotIn(const Property &property, const Iterable &values) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_IN), values, true));
         return this;
     }
 
-    template<typename Property, typename Object1, typename Object2>
-    Criteria *orBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
+    template<typename Property>
+    Criteria *orBetween(const Property &property, const Object &value1, const Object &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2, true));
         return this;
     }
 
-    template<typename Property, typename Object1, typename Object2>
-    Criteria *orNotBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
+    template<typename Property>
+    Criteria *orNotBetween(const Property &property, const Object &value1, const Object &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2, true));
         return this;
     }
@@ -336,7 +336,6 @@ public:
      * @param value     例如 5
      * @return
      */
-    template<typename Object>
     Criteria *orCondition(const std::string &condition, const Object &value) {
         criteria.emplace_back(Criterion(condition, value, true));
         return this;

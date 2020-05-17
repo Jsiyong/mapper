@@ -64,8 +64,8 @@ public:
      * @param oredCriteria
      * @return
      */
-    static std::vector<Any> getValuesFromOredCriteria(const std::vector<std::shared_ptr<Criteria>> &oredCriteria) {
-        std::vector<Any> results;
+    static std::vector<Object> getValuesFromOredCriteria(const std::vector<std::shared_ptr<Criteria>> &oredCriteria) {
+        std::vector<Object> results;
         for (auto &criteria:oredCriteria) {
             for (auto &criterion:criteria->getCriteria()) {
                 results.insert(results.end(), criterion.getValues().begin(), criterion.getValues().end());

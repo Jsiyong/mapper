@@ -80,7 +80,7 @@ public:
         return sqlBuilder->toString();
     }
 
-    std::vector<Any> getValues() {
+    std::vector<Object> getValues() {
         return ExampleHelper::getValuesFromOredCriteria(this->oredCriteria);
     }
 

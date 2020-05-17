@@ -6,9 +6,8 @@
 #define MAPPER_CRITERION_HPP
 
 #include <string>
-#include <util/TypeUtils.hpp>
 #include "SQLConstants.hpp"
-#include "Any.hpp"
+#include "Object.hpp"
 
 /**
  * 通用的一个标准
@@ -16,14 +15,14 @@
 class Criterion {
 private:
     std::string condition;
-    std::vector<Any> values;//传入的比较值,之后可以通过实体字段类型获取,一般between会有第二个值
+    std::vector<Object> values;//传入的比较值,之后可以通过实体字段类型获取,一般between会有第二个值
 
     std::string andOr;//and和or的连接语句
     bool noValue = false;//是否是无值的
     bool singleValue = false;//是否是单值
     bool betweenValue = false;//是否是between
     bool listValue = false;//是否是列表值
-    int listSize = 0;//如果是列表,列表容器的信息
+    int listSize = 0;//如果是容器列表值,列表的大小
 
 public:
     const std::string &getCondition() const {
@@ -50,7 +49,7 @@ public:
         return listValue;
     }
 
-    const std::vector<Any> &getValues() const {
+    const std::vector<Object> &getValues() const {
         return values;
     }
 
@@ -60,8 +59,7 @@ public:
 
 public:
 
-    template<typename Object1, typename Object2>
-    Criterion(const std::string &condition, const Object1 &value, const Object2 &secondValue, bool isOr = false) {
+    Criterion(const std::string &condition, const Object &value, const Object &secondValue, bool isOr = false) {
         this->condition = condition;
         this->values.emplace_back(value);
         this->values.emplace_back(secondValue);
@@ -69,17 +67,14 @@ public:
         this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
     }
 
-    template<typename Object>
     Criterion(const std::string &condition, const Object &value, bool isOr = false) {
         this->condition = condition;
         this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
-        //判断是不是集合类型
-        auto listInfo = TypeUtils::getCollectionInfo(value);
-        if (listInfo.getCollectionType() != CollectionInfo::CollectionType::Null) {
+        if (value.isContainer()) {
             this->listValue = true;
-            this->listSize = listInfo.getSize();
+            this->listSize = value.getValues().size();
             //一个个插入
-            this->values.insert(this->values.end(), listInfo.getValues().begin(), listInfo.getValues().end());
+            this->values.insert(this->values.end(), value.getValues().begin(), value.getValues().end());
         } else {
             this->singleValue = true;
             this->values.emplace_back(value);
