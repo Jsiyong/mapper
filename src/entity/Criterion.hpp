@@ -60,8 +60,8 @@ public:
 
 public:
 
-    template<typename Object>
-    Criterion(const std::string &condition, const Object &value, const Object &secondValue, bool isOr = false) {
+    template<typename Object1, typename Object2>
+    Criterion(const std::string &condition, const Object1 &value, const Object2 &secondValue, bool isOr = false) {
         this->condition = condition;
         this->values.emplace_back(value);
         this->values.emplace_back(secondValue);
@@ -72,15 +72,17 @@ public:
     template<typename Object>
     Criterion(const std::string &condition, const Object &value, bool isOr = false) {
         this->condition = condition;
-        this->values.emplace_back(value);
         this->andOr = isOr ? SQLConstants::OR : SQLConstants::AND;
         //判断是不是集合类型
         auto listInfo = TypeUtils::getCollectionInfo(value);
         if (listInfo.getCollectionType() != CollectionInfo::CollectionType::Null) {
             this->listValue = true;
             this->listSize = listInfo.getSize();
+            //一个个插入
+            this->values.insert(this->values.end(), listInfo.getValues().begin(), listInfo.getValues().end());
         } else {
             this->singleValue = true;
+            this->values.emplace_back(value);
         }
     }
 

@@ -160,14 +160,14 @@ public:
         return this;
     }
 
-    template<typename Property, typename Object>
-    Criteria *andBetween(const Property &property, const Object &value1, const Object &value2) {
+    template<typename Property, typename Object1, typename Object2>
+    Criteria *andBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2));
         return this;
     }
 
-    template<typename Property, typename Object>
-    Criteria *andNotBetween(const Property &property, const Object &value1, const Object &value2) {
+    template<typename Property, typename Object1, typename Object2>
+    Criteria *andNotBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2));
         return this;
     }
@@ -282,14 +282,14 @@ public:
         return this;
     }
 
-    template<typename Property, typename Object>
-    Criteria *orBetween(const Property &property, const Object &value1, const Object &value2) {
+    template<typename Property, typename Object1, typename Object2>
+    Criteria *orBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::BETWEEN), value1, value2, true));
         return this;
     }
 
-    template<typename Property, typename Object>
-    Criteria *orNotBetween(const Property &property, const Object &value1, const Object &value2) {
+    template<typename Property, typename Object1, typename Object2>
+    Criteria *orNotBetween(const Property &property, const Object1 &value1, const Object2 &value2) {
         criteria.emplace_back(Criterion(condition(property, SQLConstants::NOT_BETWEEN), value1, value2, true));
         return this;
     }

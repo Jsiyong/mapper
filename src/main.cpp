@@ -15,6 +15,10 @@
 
 int main() {
 
+    std::vector<int> i1 = {1, 2, 3};
+    std::vector<int> i2 = {0, -1, -2};
+    i2.insert(i2.end(), i1.begin(), i1.end());
+
     auto u1 = AliasHelper::getAliasFromType<User>();
     auto u2 = AliasHelper::getAliasFromType<User>();
     auto u3 = AliasHelper::getAliasFromType<Team>();
@@ -33,17 +37,18 @@ int main() {
     item1->andIn(&User::id, std::set<int>({1, 2, 3}));
     item1->andEqualTo(&User::id, 2);
     item1->orIsNull(&Team::teamId);
-    item1->andEqualTo(&Team::teamName, "abc");
+    item1->andEqualTo(&Team::teamName, "a");
     item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
 
     auto item2 = example.createCriteria();
-    item2->andBetween(&User::name, "123", "456");
-    item2->orGreaterThan(&User::name, "23");
+    item2->andBetween(&User::name, "12", "456");
+    item2->orGreaterThan(&User::name, "23llllll");
     example.orCriteria(item2);
     example.orderByAsc(&User::name);
     example.orderByDesc(&Team::teamId);
     auto res = example.getSelectByExample();
 
+    auto values = example.getValues();
 
 //    bool v1 = TypeUtils::isCollection(std::vector<int>());
 //    bool v2 = TypeUtils::isCollection(std::set<int>());

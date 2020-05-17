@@ -5,6 +5,8 @@
 #ifndef MAPPER_COLLECTIONINFO_HPP
 #define MAPPER_COLLECTIONINFO_HPP
 
+#include "Any.hpp"
+
 /**
  * 容器信息
  */
@@ -16,36 +18,25 @@ public:
 private:
     CollectionType collectionType = CollectionType::Null;//容器类型
     int size = 0;//容器大小
-    void *value = nullptr;//容器内容
+    std::vector<Any> values;//将容器中的所有值都保存下来,方便SQL绑定
+
 public:
     CollectionType getCollectionType() const {
         return collectionType;
-    }
-
-    void setCollectionType(CollectionType collectionType) {
-        CollectionInfo::collectionType = collectionType;
     }
 
     int getSize() const {
         return size;
     }
 
-    void setSize(int size) {
-        CollectionInfo::size = size;
+    const std::vector<Any> &getValues() const {
+        return values;
     }
 
-    void *getValue() const {
-        return value;
+    CollectionInfo(CollectionType collectionType, const std::vector<Any> &values)
+            : collectionType(collectionType), values(values) {
+        this->size = values.size();
     }
-
-    void setValue(void *value) {
-        CollectionInfo::value = value;
-    }
-
-    CollectionInfo(CollectionType collectionType, int size) : collectionType(collectionType), size(size) {}
-
-    CollectionInfo(CollectionType collectionType, int size, void *value) : collectionType(collectionType), size(size),
-                                                                           value(value) {}
 
     CollectionInfo() = default;
 };

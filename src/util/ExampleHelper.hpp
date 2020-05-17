@@ -58,6 +58,21 @@ public:
         }
         return answer;
     }
+
+    /**
+     * 从标准集合中获取所有的查询值
+     * @param oredCriteria
+     * @return
+     */
+    static std::vector<Any> getValuesFromOredCriteria(const std::vector<std::shared_ptr<Criteria>> &oredCriteria) {
+        std::vector<Any> results;
+        for (auto &criteria:oredCriteria) {
+            for (auto &criterion:criteria->getCriteria()) {
+                results.insert(results.end(), criterion.getValues().begin(), criterion.getValues().end());
+            }
+        }
+        return results;
+    }
 };
 
 #endif //MAPPER_EXAMPLEHELPER_HPP

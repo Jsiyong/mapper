@@ -14,6 +14,25 @@
  * 类型工具类
  */
 class TypeUtils {
+
+private:
+
+    /**
+     * 将容器的值转为std::vector<Any>类型存储
+     * @tparam Collection
+     * @param collection
+     * @return
+     */
+    template<typename Collection>
+    static std::vector<Any> getValuesFromCollection(const Collection &collection) {
+        std::vector<Any> results;
+//        results.insert(results.end(), collection.begin(), collection.end());
+        for (const auto &c:collection) {
+            results.emplace_back(c);
+        }
+        return results;
+    }
+
 public:
 
     /**
@@ -23,18 +42,18 @@ public:
      * @return
      */
     template<typename T>
-    static CollectionInfo getCollectionSize(const std::vector<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::Vector, value.size(), (void *) &value);
+    static CollectionInfo getCollectionInfo(const std::vector<T> &value) {
+        return CollectionInfo(CollectionInfo::CollectionType::Vector, getValuesFromCollection(value));
     }
 
     template<typename T>
     static CollectionInfo getCollectionInfo(const std::set<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::Set, value.size(), (void *) &value);
+        return CollectionInfo(CollectionInfo::CollectionType::Set, getValuesFromCollection(value));
     }
 
     template<typename T>
     static CollectionInfo getCollectionInfo(const std::list<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::List, value.size(), (void *) &value);
+        return CollectionInfo(CollectionInfo::CollectionType::List, getValuesFromCollection(value));
     }
 
     template<typename T>
