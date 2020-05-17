@@ -23,18 +23,18 @@ public:
      * @return
      */
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::vector<T> &t) {
-        return CollectionInfo(CollectionInfo::CollectionType::Vector, t.size());
+    static CollectionInfo getCollectionSize(const std::vector<T> &value) {
+        return CollectionInfo(CollectionInfo::CollectionType::Vector, value.size(), (void *) &value);
     }
 
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::set<T> &t) {
-        return CollectionInfo(CollectionInfo::CollectionType::Set, t.size());
+    static CollectionInfo getCollectionInfo(const std::set<T> &value) {
+        return CollectionInfo(CollectionInfo::CollectionType::Set, value.size(), (void *) &value);
     }
 
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::list<T> &t) {
-        return CollectionInfo(CollectionInfo::CollectionType::List, t.size());
+    static CollectionInfo getCollectionInfo(const std::list<T> &value) {
+        return CollectionInfo(CollectionInfo::CollectionType::List, value.size(), (void *) &value);
     }
 
     template<typename T>

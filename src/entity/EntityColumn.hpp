@@ -17,7 +17,7 @@
 class EntityColumn {
 private:
     void *pProperty = nullptr;//实体类字段地址
-    std::type_index typeIndex;//实体类字段类型信息
+    std::type_index typeIndex = std::type_index(typeid(void));//实体类字段类型信息
     std::string column = "";//数据库列名
     std::string property = "";//实体类属性名,包含了别名
     std::string alias;//数据库列的别名,列的别名为表的别名+"_"+列名,也是默认生成的

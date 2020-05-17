@@ -14,7 +14,7 @@ public:
         Null, List, Set, Vector
     };
 private:
-    CollectionType collectionType;//容器类型
+    CollectionType collectionType = CollectionType::Null;//容器类型
     int size = 0;//容器大小
     void *value = nullptr;//容器内容
 public:
@@ -43,6 +43,9 @@ public:
     }
 
     CollectionInfo(CollectionType collectionType, int size) : collectionType(collectionType), size(size) {}
+
+    CollectionInfo(CollectionType collectionType, int size, void *value) : collectionType(collectionType), size(size),
+                                                                           value(value) {}
 
     CollectionInfo() = default;
 };
