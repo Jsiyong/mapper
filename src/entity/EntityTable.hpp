@@ -27,7 +27,7 @@ public:
     EntityTable() = default;
 
     template<typename T>
-    EntityTable(std::shared_ptr<T> t, std::string tableName, std::string className)
+    EntityTable(std::shared_ptr<T> t, std::string className, std::string tableName)
             : tableName(std::move(tableName)),
               className(std::move(className)) {
         alias = AliasHelper::getAliasFromType<T>();//别名

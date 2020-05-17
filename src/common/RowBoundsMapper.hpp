@@ -6,6 +6,8 @@
 #define MAPPER_ROWBOUNDSMAPPER_HPP
 
 #include <vector>
+#include <entity/Example.hpp>
+#include <entity/RowBounds.hpp>
 
 /**
  * 分页查询的mapper
@@ -29,7 +31,7 @@ public:
     * @param rowBounds
     * @return
     */
-    std::vector<T> selectByExampleAndRowBounds(const Example &example, const RowBounds &rowBounds) {
+    std::vector<T> selectByExampleAndRowBounds(const Example<T> &example, const RowBounds &rowBounds) {
 
     }
 

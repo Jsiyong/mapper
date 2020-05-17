@@ -40,7 +40,7 @@ private:
      * 合并OredCriteria
      * @param sqlBuilder
      */
-    void buildOredCriteria(std::shared_ptr<SQLBuilder> sqlBuilder) {
+    void buildOredCriteria(const std::shared_ptr<SQLBuilder> &sqlBuilder) const {
         for (auto &criteria : oredCriteria) {
             if (criteria->getAndOr() == SQLConstants::OR) {
                 sqlBuilder->OR();
@@ -52,11 +52,15 @@ private:
 
 public:
 
-    std::string getSelectByExample() {
+    /**
+     * 通过Example获取查询的语句
+     * @return
+     */
+    std::string getSelectStatementByExample() const {
         auto sqlBuilder = std::make_shared<SQLBuilder>();
         for (const auto &p:propertyMap) {
             //用别名
-            sqlBuilder->SELECT(p.second.getColumn() + " " + SQLConstants::AS + " " + p.second.getAlias());
+            sqlBuilder->SELECT(p.second.getColumnWithTableAlias() + " " + SQLConstants::AS + " " + p.second.getAlias());
         }
         //表也要用别名
         sqlBuilder->FROM(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
@@ -80,11 +84,27 @@ public:
         return sqlBuilder->toString();
     }
 
-    std::vector<Object> getValues() {
+    /**
+     * 获取该Example传入的所有预处理的参数值
+     * @return
+     */
+    std::vector<Object> getPrepareValues() const {
         return ExampleHelper::getValuesFromOredCriteria(this->oredCriteria);
     }
 
+    std::map<std::string, EntityColumn> getColumnAliasMap() const {
+        std::map<std::string, EntityColumn> res;
+        for (auto &pm :this->propertyMap) {
+            res.insert(std::make_pair(pm.second.getAlias(), pm.second));
+        }
+        return res;
+    }
+
 public:
+    const std::shared_ptr<Entity> &getEntity() const {
+        return entityClass;
+    }
+
     /**
      * 初始化获取数据
      */

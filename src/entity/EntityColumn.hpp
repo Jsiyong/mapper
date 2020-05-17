@@ -46,6 +46,8 @@ private:
     }
 
 public:
+    EntityColumn() = default;
+
     template<typename Entity, typename T>
     EntityColumn(std::shared_ptr<Entity>, T *pProperty, const std::string &property, const std::string &column,
                  ColumnType columnType, KeySql keySql, JoinType joinType):typeIndex(typeid(T)) {
@@ -101,6 +103,18 @@ public:
 
     const std::string &getJoinTableAlias() const {
         return joinTableAlias;
+    }
+
+    /**
+     * 获取属性的地址值
+     * @return
+     */
+    void *getPropertyPtr() const {
+        return pProperty;
+    }
+
+    const std::type_index &getTypeIndex() const {
+        return typeIndex;
     }
 };
 

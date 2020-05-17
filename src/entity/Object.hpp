@@ -16,26 +16,39 @@
  */
 class Object {
 protected:
-    void *value = nullptr;//存放的是值的地址
+    struct Buff {
+        std::string stringValue;//字符串的缓存区
+        int intValue = 0;//整型的缓存区
+        std::vector<Object> values;
+    } buff;//缓存数据的内容
+
+    void *value = nullptr;
     std::type_index typeIndex = std::type_index(typeid(void));//存放的是值的类型
     bool container = false;//是否是一个容器值
-    std::vector<Object> values;
 
 protected:
     //专门供给子类调用的构造函数
-    template<typename Value>
-    Object(const Value &value, std::type_index typeIndex, bool container):
-            value(value), typeIndex(typeIndex), container(container) {}
+    Object(std::type_index typeIndex, bool container)
+            : typeIndex(typeIndex), container(container) {}
 
 public:
     //将可以转为std::string类型,都归入std::string类型
-    Object(const std::string &value) : value((void *) &value), typeIndex(typeid(std::string)) {};
+    Object(const std::string &value) : typeIndex(typeid(std::string)) {
+        buff.stringValue = value;
+        this->value = (void *) buff.stringValue.c_str();
+    };
 
     //将可以转为const char*类型,也都归入std::string类型
-    Object(const char *value) : value((void *) &value), typeIndex(typeid(std::string)) {};
+    Object(const char *value) : typeIndex(typeid(std::string)) {
+        buff.stringValue = value;
+        this->value = (void *) buff.stringValue.c_str();
+    };
 
     //将可以转为int类型,都归入int类型
-    Object(int value) : value((void *) &value), typeIndex(typeid(int)) {};
+    Object(int value) : typeIndex(typeid(int)) {
+        buff.intValue = value;
+        this->value = (void *) &buff.intValue;
+    };
 
     Object() = default;
 
@@ -47,13 +60,38 @@ public:
         return nullptr == value;
     }
 
-    void *getValue() const {
-        return value;
+    /**
+     * 整型
+     * @tparam T
+     * @return
+     */
+    template<typename T>
+    const typename std::enable_if<std::is_same<int, T>::value, int>::type &getValue() const {
+        return buff.intValue;
     }
+
+    /**
+     * 字符串类型
+     * @tparam T
+     * @return
+     */
+    template<typename T>
+    const typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type &getValue() const {
+        return buff.stringValue;
+    }
+
+//    /**
+//     * 返回的是buf的地址值
+//     * @return
+//     */
+//    void *getValuePtr() const {
+//        return value;
+//    }
 
     const std::type_index &getTypeIndex() const {
         return typeIndex;
     }
+
 
     /**
      * 是否是一个容器
@@ -68,7 +106,7 @@ public:
      * @return
      */
     const std::vector<Object> &getValues() const {
-        return values;
+        return buff.values;
     }
 };
 

@@ -151,6 +151,7 @@ public:
         //根据表元数据绑定结果集
         for (int i = 0; i < mysqlRes->field_count; i++) {
             resultBinder->bindValue(mysqlRes->fields[i].type, i);
+            this->records.emplace_back(mysqlRes->fields[i].name);
 //            std::cout << "name:" << mysqlRes->fields[i].name << " type: " << mysqlRes->fields[i].type << std::endl;
         }
         //绑定查询结果
@@ -172,8 +173,8 @@ public:
      * @param pos 位置
      * @param value 值
      */
-    template<typename T>
-    void bindValue(int pos, const T &value) {
+//    template<typename T>
+    void bindValue(int pos, const Object &value) {
         prepareBinder->bindValue(pos, value);
     }
 
@@ -218,6 +219,10 @@ public:
         return resultBinder->value<T>(index);
     }
 
+    const std::vector<std::string> &getRecords() const {
+        return records;
+    }
+
 private:
     MYSQL *connection = nullptr;
     MYSQL_STMT *mysqlStmt = nullptr;
@@ -225,6 +230,7 @@ private:
 
     std::string lastError;//最后的错误信息
     DatabaseOption option;//数据库配置信息
+    std::vector<std::string> records;//查询的列的名称
 
     std::shared_ptr<PrepareBinder> prepareBinder = nullptr;
     std::shared_ptr<ResultBinder> resultBinder = nullptr;

@@ -12,8 +12,13 @@
 #include <util/TypeUtils.hpp>
 #include <entity/Example.hpp>
 #include <util/AliasHelper.hpp>
+#include <common/Mapper.hpp>
 
 int main() {
+    int ii = 19;
+    void *iii = (void *) &ii;
+    int i22 = *(int *) iii;
+
 
     std::vector<int> i1 = {1, 2, 3};
     std::vector<int> i2 = {0, -1, -2};
@@ -33,22 +38,29 @@ int main() {
 //    auto a = &User::team;
     Example<User> example;
     auto item1 = example.createCriteria();
+//    item1->andGreaterThan(&User::id, 1);
+//    item1->andLike(&User::name, "%i%");
+    item1->andIn(&User::id, std::vector<int>({2, 1}));
+//    item1->andEqualTo(&User::id, 2);
+//    item1->orIsNull(&Team::teamId);
+//    item1->andEqualTo(&Team::teamName, "a");
+//    item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
 
-    item1->andIn(&User::id, std::set<int>({1, 2, 3}));
-    item1->andEqualTo(&User::id, 2);
-    item1->orIsNull(&Team::teamId);
-    item1->andEqualTo(&Team::teamName, "a");
-    item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
+//    auto item2 = example.createCriteria();
+//    item2->andBetween(&User::name, "12", "456");
+//    item2->orGreaterThan(&User::name, "23llllll");
+//    example.orCriteria(item2);
+//    example.orderByAsc(&User::name);
+//    example.orderByDesc(&Team::teamId);
+    auto res = example.getSelectStatementByExample();
 
-    auto item2 = example.createCriteria();
-    item2->andBetween(&User::name, "12", "456");
-    item2->orGreaterThan(&User::name, "23llllll");
-    example.orCriteria(item2);
-    example.orderByAsc(&User::name);
-    example.orderByDesc(&Team::teamId);
-    auto res = example.getSelectByExample();
+    auto values = example.getPrepareValues();
 
-    auto values = example.getValues();
+    Mapper<User> userMapper;
+    auto users = userMapper.selectByExample(example);
+    for (auto &u:users) {
+        std::cout << *u << std::endl;
+    }
 
 //    bool v1 = TypeUtils::isCollection(std::vector<int>());
 //    bool v2 = TypeUtils::isCollection(std::set<int>());

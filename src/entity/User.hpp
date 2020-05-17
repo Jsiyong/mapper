@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <tuple>
+#include <ostream>
 #include "EntityWrapper.hpp"
 #include "EntityColumn.hpp"
 #include "EntityTable.hpp"
@@ -16,6 +17,10 @@ struct Team {
     int teamId = 0;
     std::string teamName = "123";
 
+    friend std::ostream &operator<<(std::ostream &os, const Team &team) {
+        os << "teamId: " << team.teamId << " teamName: " << team.teamName;
+        return os;
+    }
 };
 
 template<>
@@ -25,10 +30,10 @@ public:
         return std::make_tuple(
                 EntityTable(entity, "Team", "team"),
                 std::make_pair(&Team::teamId,
-                               EntityColumn(entity, &entity->teamId, "teamId", "Team_Id", ColumnType::Null, KeySql::Null,
+                               EntityColumn(entity, &entity->teamId, "teamId", "id", ColumnType::Null, KeySql::Null,
                                             JoinType::Null)),
                 std::make_pair(&Team::teamName,
-                               EntityColumn(entity, &entity->teamName, "teamName", "teamName", ColumnType::Null,
+                               EntityColumn(entity, &entity->teamName, "teamName", "team_name", ColumnType::Null,
                                             KeySql::Null, JoinType::Null))
         );
     }
@@ -38,6 +43,11 @@ struct User {
     int id = 0;
     std::string name = "";
     Team team;
+
+    friend std::ostream &operator<<(std::ostream &os, const User &user) {
+        os << "id: " << user.id << " name: " << user.name << " team: " << user.team;
+        return os;
+    }
 };
 
 template<>
@@ -51,11 +61,12 @@ public:
                                                        JoinType::Null)),
                 std::make_pair(&User::name,
                                EntityColumn(entity, &entity->name, "name", "name", ColumnType::Null, KeySql::Null,
-                                            JoinType::Null)),
-                //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
-                std::make_pair(&User::team,
-                               EntityColumn(entity, &entity->team, "team", "team_id1", ColumnType::Null, KeySql::Null,
-                                            JoinType::LeftJoin, &Team::teamId))
+                                            JoinType::Null))
+//                                            ,
+//                //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
+//                std::make_pair(&User::team,
+//                               EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,
+//                                            JoinType::LeftJoin, &Team::teamId))
         );
     }
 };

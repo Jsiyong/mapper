@@ -20,25 +20,26 @@ private:
     */
     template<typename Collection>
     void save2Collection(const Collection &collection) {
+        this->value = &buff.values;//保存一下value地址
         for (const auto &c:collection) {
-            //加入values集合中
-            this->values.emplace_back(c);
+            //加入values集合中,注意,要插入一个新的对象
+            this->buff.values.emplace_back(Object(c));
         }
     }
 
 public:
     template<typename T>
-    Iterable(const std::set<T> &value) : Object((void *) &value, typeid(std::set<T>), true) {
+    Iterable(const std::set<T> &value) : Object(typeid(std::set<T>), true) {
         save2Collection(value);
     };
 
     template<typename T>
-    Iterable(const std::list<T> &value) : Object((void *) &value, typeid(std::list<T>), true) {
+    Iterable(const std::list<T> &value) : Object(typeid(std::list<T>), true) {
         save2Collection(value);
     };
 
     template<typename T>
-    Iterable(const std::vector<T> &value) : Object((void *) &value, typeid(std::list<T>), true) {
+    Iterable(const std::vector<T> &value) : Object(typeid(std::list<T>), true) {
         save2Collection(value);
     };
 
