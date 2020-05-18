@@ -214,9 +214,8 @@ public:
     * @param index
     * @return
     */
-    template<typename T>
-    T value(int index) {
-        return resultBinder->value<T>(index);
+    Object value(int index) {
+        return resultBinder->value(index);
     }
 
     const std::vector<std::string> &getRecords() const {

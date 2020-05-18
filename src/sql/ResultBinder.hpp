@@ -16,26 +16,11 @@
  */
 class ResultBinder {
 private:
-    /**
-     * 负责类型转发
-     * @tparam T
-     */
-    template<typename T>
-    struct IndexWrapper {
-        int index = 0;//索引
-
-        explicit IndexWrapper(int index) : index(index) {}
-    };
-
-private:
     const static int STRING_MAX_LENGTH = 65535;
 
     std::vector<MYSQL_BIND> resultBinds;
 
-    //字符串缓存
-    std::vector<std::vector<char>> stringBuffer;
-    //整型的缓存
-    std::vector<int> intBuffer;
+    std::vector<Object> bindValues;//保存的任意类型的缓存
 
     //类型与处理函数映射
     std::map<int, std::function<void(int)>> typeProcessMap = {
@@ -44,34 +29,18 @@ private:
     };
 private:
     void bindInt(int index) {
+        bindValues[index] = std::type_index(typeid(int));
+
         resultBinds[index].buffer_type = MYSQL_TYPE_LONG;
-        resultBinds[index].buffer = &intBuffer[index];
+        resultBinds[index].buffer = bindValues[index].getValuePtr();
     }
 
     void bindString(int index) {
-        stringBuffer[index].clear();
-        stringBuffer[index].resize(STRING_MAX_LENGTH);
-        resultBinds[index].buffer_type = MYSQL_TYPE_STRING;
-        resultBinds[index].buffer = stringBuffer[index].data();
-        resultBinds[index].buffer_length = STRING_MAX_LENGTH;
-    }
-
-    /**
-    * 提取结果集中的字符串结果
-    * @param index
-    * @return
-    */
-    std::string value(IndexWrapper<std::string> wrapper) {
-        return stringBuffer[wrapper.index].data();
-    }
-
-    /**
-    * 提取结果集中的整型结果
-    * @param index
-    * @return
-    */
-    int value(IndexWrapper<int> wrapper) {
-        return intBuffer[wrapper.index];
+        bindValues[index] = std::type_index(typeid(std::string));
+        bindValues[index].resize(STRING_MAX_LENGTH);
+        resultBinds[index].buffer_type = MYSQL_TYPE_VAR_STRING;
+        resultBinds[index].buffer = bindValues[index].getValuePtr();
+        resultBinds[index].buffer_length = MYSQL_TYPE_VAR_STRING;
     }
 
 public:
@@ -82,8 +51,7 @@ public:
      */
     explicit ResultBinder(int resultBindNum) {
         resultBinds.resize(resultBindNum);
-        stringBuffer.resize(resultBindNum);
-        intBuffer.resize(resultBindNum);
+        bindValues.resize(resultBindNum);
     }
 
 
@@ -106,9 +74,8 @@ public:
     * @param index
     * @return
     */
-    template<typename T>
-    T value(int index) {
-        return value(std::move(IndexWrapper<T>(index)));
+    Object value(int index) {
+        return bindValues[index];
     }
 
     std::vector<MYSQL_BIND> &getBindResult() {

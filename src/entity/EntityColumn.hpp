@@ -49,7 +49,7 @@ public:
     EntityColumn() = default;
 
     template<typename Entity, typename T>
-    EntityColumn(std::shared_ptr<Entity>, T *pProperty, const std::string &property, const std::string &column,
+    EntityColumn(Entity *, T *pProperty, const std::string &property, const std::string &column,
                  ColumnType columnType, KeySql keySql, JoinType joinType):typeIndex(typeid(T)) {
         this->tableAlias = AliasHelper::getAliasFromType<Entity>();//先拿出实体类的别名,属性要加上类的别名,避免连表混乱
         this->pProperty = pProperty;
@@ -62,7 +62,7 @@ public:
     }
 
     template<typename Entity, typename T, typename J>
-    EntityColumn(std::shared_ptr<Entity> entity, T *pProperty, const std::string &property, const std::string &column,
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
                  ColumnType columnType, KeySql keySql, JoinType joinType, const J &joinColunm) :typeIndex(typeid(T)) {
         new(this)EntityColumn(entity, pProperty, property, column, columnType, keySql, joinType);
         //获取连接属性名和表别
@@ -105,16 +105,21 @@ public:
         return joinTableAlias;
     }
 
-    /**
-     * 获取属性的地址值
-     * @return
-     */
-    void *getPropertyPtr() const {
-        return pProperty;
-    }
-
     const std::type_index &getTypeIndex() const {
         return typeIndex;
+    }
+
+    /**
+     * 绑定value值到该对象的字段中
+     * @param value
+     */
+    void bindValue2EntityField(const Object &value) {
+        if (this->getTypeIndex() == typeid(int)) {
+            *(int *) pProperty = value.getValue<int>();
+        }
+        if (this->getTypeIndex() == typeid(std::string)) {
+            *(std::string *) pProperty = value.getValue<std::string>();
+        }
     }
 };
 

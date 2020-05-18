@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <cstring>
 
 /**
  * 简单包装一下Object类型,方便之后取出来使用
@@ -17,12 +18,11 @@
 class Object {
 protected:
     struct Buff {
-        std::string stringValue;//字符串的缓存区
+        std::vector<char> stringValue;//字符串的缓存区
         int intValue = 0;//整型的缓存区
         std::vector<Object> values;
     } buff;//缓存数据的内容
 
-    void *value = nullptr;
     std::type_index typeIndex = std::type_index(typeid(void));//存放的是值的类型
     bool container = false;//是否是一个容器值
 
@@ -32,23 +32,22 @@ protected:
             : typeIndex(typeIndex), container(container) {}
 
 public:
+    //创建一个相对应类型的Object,构造函数的形式
+    Object(const std::type_index &typeIndex) : typeIndex(typeIndex) {}
+
     //将可以转为std::string类型,都归入std::string类型
     Object(const std::string &value) : typeIndex(typeid(std::string)) {
-        buff.stringValue = value;
-        this->value = (void *) buff.stringValue.c_str();
+        buff.stringValue.assign(value.begin(), value.end());
     };
 
     //将可以转为const char*类型,也都归入std::string类型
     Object(const char *value) : typeIndex(typeid(std::string)) {
-        buff.stringValue = value;
-        this->value = (void *) buff.stringValue.c_str();
+        buff.stringValue.resize(strlen(value));
+        std::memcpy(buff.stringValue.data(), value, strlen(value));
     };
 
     //将可以转为int类型,都归入int类型
-    Object(int value) : typeIndex(typeid(int)) {
-        buff.intValue = value;
-        this->value = (void *) &buff.intValue;
-    };
+    Object(int value) : typeIndex(typeid(int)) { buff.intValue = value; };
 
     Object() = default;
 
@@ -57,7 +56,7 @@ public:
      * @return
      */
     bool isNull() {
-        return nullptr == value;
+        return typeIndex == typeid(void);
     }
 
     /**
@@ -66,7 +65,7 @@ public:
      * @return
      */
     template<typename T>
-    const typename std::enable_if<std::is_same<int, T>::value, int>::type &getValue() const {
+    typename std::enable_if<std::is_same<int, T>::value, int>::type getValue() const {
         return buff.intValue;
     }
 
@@ -76,17 +75,23 @@ public:
      * @return
      */
     template<typename T>
-    const typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type &getValue() const {
-        return buff.stringValue;
+    typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type getValue() const {
+        return buff.stringValue.data();
     }
 
-//    /**
-//     * 返回的是buf的地址值
-//     * @return
-//     */
-//    void *getValuePtr() const {
-//        return value;
-//    }
+    /**
+     * 返回的是buf的地址值
+     * @return
+     */
+    void *getValuePtr() const {
+        if (typeIndex == typeid(int)) {
+            return (void *) &buff.intValue;
+        }
+        if (typeIndex == typeid(std::string)) {
+            return (void *) buff.stringValue.data();
+        }
+        return nullptr;
+    }
 
     const std::type_index &getTypeIndex() const {
         return typeIndex;
@@ -107,6 +112,14 @@ public:
      */
     const std::vector<Object> &getValues() const {
         return buff.values;
+    }
+
+    /**
+     * 重新设置缓存区的大小,在这里特指
+     * @param size
+     */
+    void resize(int size) {
+        this->buff.stringValue.resize(size);
     }
 };
 

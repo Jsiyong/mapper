@@ -30,32 +30,18 @@ public:
 
         auto connector = ConnectionPool::getInstance()->getConnection();
         connector->prepare(sql);
-        int i = 0;
-        for (auto &prepareValue:prepareValues) {
-            if (prepareValue.getTypeIndex() == typeid(int)) {
-               std::cout << prepareValue.template getValue<int>() << std::endl;
-                connector->bindValue(i, prepareValue.template getValue<int>());
-            }
-            if (prepareValue.getTypeIndex() == typeid(std::string)) {
-//                std::cout << prepareValue.template getValue<std::string>() << std::endl;
-                connector->bindValue(i, prepareValue.template getValue<std::string>());
-            }
-            i++;
+        //绑定
+        for (int i = 0; i < prepareValues.size(); ++i) {
+            connector->bindValue(i, prepareValues[i]);
         }
         connector->execute();
         while (connector->next()) {
             auto tmp = Example<T>();
             auto columnMap = tmp.getColumnAliasMap();
             for (int j = 0; j < connector->getRecords().size(); ++j) {
-                std::cout << connector->getRecords()[j] << std::endl;
+//                std::cout << connector->getRecords()[j] << std::endl;
                 auto c = columnMap[connector->getRecords()[j]];
-                auto propertyPtr = c.getPropertyPtr();
-                if (c.getTypeIndex() == typeid(int)) {
-                    *(int *) propertyPtr = connector->value<int>(j);
-                }
-                if (c.getTypeIndex() == typeid(std::string)) {
-                    *(std::string *) propertyPtr = connector->value<std::string>(j);
-                }
+                c.bindValue2EntityField(connector->value(j));
             }
             results.push_back(tmp.getEntity());
         }

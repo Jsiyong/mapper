@@ -24,11 +24,12 @@ private:
          * @param tuple
          * @param resultMap
          */
-        static void getResultMap(const Tuple &tuple, std::shared_ptr<EntityTableMap> resultMap) {
+        template<typename Entity>
+        static void getResultMap(Entity *entity, const Tuple &tuple, std::shared_ptr<EntityTableMap> resultMap) {
             //编译期递归
-            ResultGetter<Tuple, N - 1>::getResultMap(tuple, resultMap);
+            ResultGetter<Tuple, N - 1>::getResultMap(entity, tuple, resultMap);
             //模板匹配
-            bind2ResultMap(std::get<N - 1>(tuple), resultMap);
+            bind2ResultMap(entity, std::get<N - 1>(tuple), resultMap);
         }
 
         /**
@@ -75,33 +76,37 @@ private:
         }
 
     private:
-        template<typename T>
-        static void bind2ResultMap(const T &t, std::shared_ptr<EntityTableMap> resultMap) {}
+        template<typename Entity, typename T>
+        static void bind2ResultMap(Entity *, const T &, std::shared_ptr<EntityTableMap>) {}
 
         //获取EntityTable,并加入表格中
-        static void bind2ResultMap(const EntityTable &entityTable, std::shared_ptr<EntityTableMap> resultMap) {
+        template<typename Entity>
+        static void
+        bind2ResultMap(Entity *, const EntityTable &entityTable, std::shared_ptr<EntityTableMap> resultMap) {
             resultMap->getEntityTables().emplace_back(entityTable);
         }
 
         //获取实体字段到表格列的映射
-        template<typename R, typename T>
+        template<typename Entity, typename R, typename T>
         static void
-        bind2ResultMap(const std::pair<R T::*, EntityColumn> &pair, std::shared_ptr<EntityTableMap> resultMap) {
+        bind2ResultMap(Entity *entity, const std::pair<R T::*, EntityColumn> &pair,
+                       std::shared_ptr<EntityTableMap> resultMap) {
             auto &propertyMap = resultMap->getPropertyMap();
             //注意!!! 成员属性中已经加入了别名了"别名.属性名"
             propertyMap.insert(std::make_pair(pair.second.getProperty(), pair.second));
             //递归查找其他关联类型的resultMap
-            auto relatedEntity = std::make_shared<R>();
+            //&entity->*pair.first ==>对应的自定义类型字段的指针
             //关联的反射信息
-            auto relatedReflectionInfo = EntityWrapper<R>().getReflectionInfo(relatedEntity);
+            auto relatedReflectionInfo = EntityWrapper<R>().getReflectionInfo(&(entity->*pair.first));
             //递归获取结果集映射关系
-            EntityHelper::getResultMap(relatedReflectionInfo, resultMap);
+            EntityHelper::getResultMap(&(entity->*pair.first), relatedReflectionInfo, resultMap);
         }
     };
 
     template<typename Tuple>
     struct ResultGetter<Tuple, 0> {
-        static void getResultMap(const Tuple &, std::shared_ptr<EntityTableMap>) {}
+        template<typename Entity>
+        static void getResultMap(Entity *, const Tuple &, std::shared_ptr<EntityTableMap>) {}
 
         template<typename T>
         static void getProperty(const Tuple &, T, std::string &) {}
@@ -122,10 +127,8 @@ private:
      * @param t
      * @param resultMap
      */
-    template<typename T>
-    static void getResultMap(const T &t, std::shared_ptr<EntityTableMap> resultMap) {}
-
-public:
+    template<typename Entity, typename T>
+    static void getResultMap(Entity, T, std::shared_ptr<EntityTableMap> resultMap) {}
 
     /**
      * 从tuple中获取ResultMap
@@ -133,9 +136,26 @@ public:
      * @param tuple
      * @param resultMap
      */
-    template<typename... Args>
-    static void getResultMap(const std::tuple<Args...> &tuple, std::shared_ptr<EntityTableMap> resultMap) {
-        ResultGetter<decltype(tuple), sizeof...(Args)>::getResultMap(tuple, resultMap);
+    template<typename Entity, typename... Args>
+    static void
+    getResultMap(Entity *entity, const std::tuple<Args...> &tuple, std::shared_ptr<EntityTableMap> resultMap) {
+        ResultGetter<decltype(tuple), sizeof...(Args)>::getResultMap(entity, tuple, resultMap);
+    }
+
+public:
+
+    /**
+     * 获取Entity对象的ResultMap,并返回一个对象
+     * @tparam Entity
+     * @param resultMap
+     * @return
+     */
+    template<typename Entity>
+    static std::shared_ptr<Entity> getResultMap(std::shared_ptr<EntityTableMap> resultMap) {
+        std::shared_ptr<Entity> entity = std::make_shared<Entity>();
+        auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entity.get());
+        getResultMap(entity.get(), reflectionInfo, resultMap);
+        return entity;
     }
 
     /**
@@ -149,7 +169,7 @@ public:
     template<typename T, typename Entity>
     static std::string getProperty(T Entity::* t) {
         auto entity = std::make_shared<Entity>();
-        auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(entity);
+        auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(entity.get());
         return getProperty(resultTuple, t);
     }
 };

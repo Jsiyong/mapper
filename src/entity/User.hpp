@@ -26,7 +26,7 @@ struct Team {
 template<>
 class EntityWrapper<Team> {
 public:
-    auto getReflectionInfo(std::shared_ptr<Team> entity) {
+    auto getReflectionInfo(Team *entity) {
         return std::make_tuple(
                 EntityTable(entity, "Team", "team"),
                 std::make_pair(&Team::teamId,
@@ -54,7 +54,7 @@ template<>
 class EntityWrapper<User> {
 public:
 
-    auto getReflectionInfo(std::shared_ptr<User> entity) {
+    auto getReflectionInfo(User *entity) {
         return std::make_tuple(
                 EntityTable(entity, "User", "user"),
                 std::make_pair(&User::id, EntityColumn(entity, &entity->id, "id", "id", ColumnType::Null, KeySql::Null,
@@ -62,11 +62,11 @@ public:
                 std::make_pair(&User::name,
                                EntityColumn(entity, &entity->name, "name", "name", ColumnType::Null, KeySql::Null,
                                             JoinType::Null))
-//                                            ,
-//                //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
-//                std::make_pair(&User::team,
-//                               EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,
-//                                            JoinType::LeftJoin, &Team::teamId))
+                                            ,
+                //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
+                std::make_pair(&User::team,
+                               EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,
+                                            JoinType::LeftJoin, &Team::teamId))
         );
     }
 };

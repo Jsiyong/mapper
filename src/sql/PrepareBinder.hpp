@@ -36,7 +36,7 @@ private:
      */
     void bindIntValue(int pos, const Object &value) {
         paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
-        paramBinds[pos].buffer = (void *) &value.getValue<int>();
+        paramBinds[pos].buffer = value.getValuePtr();
         paramBinds[pos].is_unsigned = false;
     }
 
@@ -47,7 +47,7 @@ private:
      */
     void bindUIntValue(int pos, const Object &value) {
         paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
-        paramBinds[pos].buffer = (void *) &value.getValue<int>();
+        paramBinds[pos].buffer = value.getValuePtr();
         paramBinds[pos].is_unsigned = true;
     }
 
@@ -58,7 +58,7 @@ private:
      */
     void bindStringValue(int pos, const Object &value) {
         paramBinds[pos].buffer_type = MYSQL_TYPE_STRING;
-        paramBinds[pos].buffer = (void *) value.getValue<std::string>().c_str();
+        paramBinds[pos].buffer = value.getValuePtr();
         paramBinds[pos].buffer_length = value.getValue<std::string>().size();
     }
 
@@ -84,20 +84,6 @@ public:
         //调用绑定函数
         typeProcessMap[value.getTypeIndex()](pos, value);
     }
-
-//    /**
-//     * 绑定Object类型
-//     * @param pos
-//     * @param value
-//     */
-//    void bindValue(int pos, const Object &value) {
-//        if (value.getTypeIndex() == typeid(int)) {
-//            bindValue(pos, *(int *) value.getValue());
-//        }
-//        if (value.getTypeIndex() == typeid(std::string)) {
-//            bindValue(pos, *(std::string *) value.getValue());
-//        }
-//    }
 };
 
 #endif //MAPPER_PREPAREBINDER_HPP

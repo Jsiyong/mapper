@@ -53,7 +53,7 @@ public:
     * @return
     */
     std::shared_ptr<Connection> getConnection() {
-        std::cout << "connection" << currentConnectionNum << std::endl;
+//        std::cout << "connection" << currentConnectionNum << std::endl;
         std::unique_lock<std::mutex> lock(mutex);//加上互斥锁
         std::shared_ptr<Connection> connection = nullptr;
         //移除无效连接

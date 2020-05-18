@@ -23,7 +23,7 @@ class Example {
 private:
     std::vector<std::shared_ptr<Criteria>> oredCriteria;//标准列表
     std::map<std::string, EntityColumn> propertyMap; //属性和列对应,是所有的,包括连接出来的
-    std::shared_ptr<Entity> entityClass = std::make_shared<Entity>();//实体类
+    std::shared_ptr<Entity> entityClass = nullptr;//实体类
     EntityTable table;//该实体类对应的表
     std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
     std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
@@ -110,8 +110,7 @@ public:
      */
     Example() {
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
-        auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entityClass);
-        EntityHelper::getResultMap(reflectionInfo, resultMap);
+        this->entityClass = EntityHelper::getResultMap<Entity>(resultMap);
         //拆分表信息
         for (auto &t: resultMap->getEntityTables()) {
             //若当前类的别名和t的别名一致,说明是当前类,否则是关联的类

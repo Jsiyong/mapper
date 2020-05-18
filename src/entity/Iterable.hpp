@@ -20,10 +20,9 @@ private:
     */
     template<typename Collection>
     void save2Collection(const Collection &collection) {
-        this->value = &buff.values;//保存一下value地址
         for (const auto &c:collection) {
-            //加入values集合中,注意,要插入一个新的对象
-            this->buff.values.emplace_back(Object(c));
+            //加入values集合中,注意,不能push_back,避免对象发生赋值
+            this->buff.values.emplace_back(c);
         }
     }
 
