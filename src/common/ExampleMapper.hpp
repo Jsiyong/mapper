@@ -45,6 +45,7 @@ public:
             }
             results.push_back(tmp.getEntity());
         }
+        ConnectionPool::getInstance()->releaseConnection(connector);
         return results;
     }
 

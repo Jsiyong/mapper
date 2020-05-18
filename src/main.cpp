@@ -34,37 +34,36 @@ int main() {
     auto u3 = AliasHelper::getAliasFromType<Team>();
     auto u4 = AliasHelper::getAliasFromType<User>();
     auto u5 = AliasHelper::getAliasFromType<Team>();
-
+    {
 //    auto name_ = EntityHelper::getProperty(&User::name);
 //    auto id_ = EntityHelper::getProperty(&User::id);
 
 
 //    auto b = &User::id;
 //    auto a = &User::team;
-    Example<User> example;
-    auto item1 = example.createCriteria();
+        Example<User> example;
+        auto item1 = example.createCriteria();
 //    item1->andGreaterThan(&User::id, 1);
 //    item1->andLike(&User::name, "%i%");
-    item1->andIn(&User::id, std::vector<int>({2, 1, 3}));
+        item1->andIn(&User::id, std::vector<int>({2, 1, 3}));
 //    item1->andEqualTo(&User::id, 2);
 //    item1->orIsNull(&Team::teamId);
-//    item1->andEqualTo(&Team::teamName, "teamA");
+        item1->andEqualTo(&Team::teamName, "teamA");
 //    item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
-
 //    auto item2 = example.createCriteria();
 //    item2->andBetween(&User::name, "12", "456");
 //    item2->orGreaterThan(&User::name, "23llllll");
 //    example.orCriteria(item2);
-    example.orderByAsc(&User::name);
-//    example.orderByDesc(&Team::teamId);
-    auto res = example.getSelectStatementByExample();
-
-    auto values = example.getPrepareValues();
-
-    Mapper<User> userMapper;
-    auto users = userMapper.selectByExample(example);
-    for (auto &u:users) {
-        std::cout << *u << std::endl;
+        example.orderByAsc(&User::name);
+        example.orderByDesc(&Team::teamId);
+//    auto res = example.getSelectStatementByExample();
+//    auto values = example.getPrepareValues();
+        Mapper<User> userMapper;
+        auto users = userMapper.selectByExample(example);
+        std::cout << users.size() << std::endl;
+        for (auto &u:users) {
+            std::cout << *u << std::endl;
+        }
     }
 //
 ////    bool v1 = TypeUtils::isCollection(std::vector<int>());
