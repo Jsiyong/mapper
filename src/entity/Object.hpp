@@ -38,12 +38,14 @@ public:
     //将可以转为std::string类型,都归入std::string类型
     Object(const std::string &value) : typeIndex(typeid(std::string)) {
         buff.stringValue.assign(value.begin(), value.end());
+        buff.stringValue.emplace_back('\0');//必须加入结束符,避免之后不必要的错误
     };
 
     //将可以转为const char*类型,也都归入std::string类型
     Object(const char *value) : typeIndex(typeid(std::string)) {
         buff.stringValue.resize(strlen(value));
         std::memcpy(buff.stringValue.data(), value, strlen(value));
+        buff.stringValue.emplace_back('\0');//必须加入结束符,避免之后不必要的错误
     };
 
     //将可以转为int类型,都归入int类型

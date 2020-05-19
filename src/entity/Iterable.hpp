@@ -28,17 +28,16 @@ private:
 
 public:
     template<typename T>
-    Iterable(const std::set<T> &value) : Object(typeid(std::set<T>), true) {
-        save2Collection(value);
-    };
+    Iterable(const std::set<T> &value) : Object(typeid(std::set<T>), true) { save2Collection(value); };
 
     template<typename T>
-    Iterable(const std::list<T> &value) : Object(typeid(std::list<T>), true) {
-        save2Collection(value);
-    };
+    Iterable(const std::list<T> &value) : Object(typeid(std::list<T>), true) { save2Collection(value); };
 
     template<typename T>
-    Iterable(const std::vector<T> &value) : Object(typeid(std::list<T>), true) {
+    Iterable(const std::vector<T> &value) : Object(typeid(std::list<T>), true) { save2Collection(value); };
+
+    template<typename T>
+    Iterable(const std::initializer_list<T> &value) : Object(typeid(std::initializer_list<T>), true) {
         save2Collection(value);
     };
 
