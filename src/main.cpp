@@ -15,76 +15,51 @@
 #include <common/Mapper.hpp>
 #include <cstring>
 
+class ABC {
+public:
+    void A() {
+        ABC abc;
+        return;
+    }
+};
+
 int main() {
+    ABC abc;
+    abc.A();
+    Dept dept;
+    auto de = &Dept::teams;
+    auto ii = &(&dept->*de);
+    EntityWrapper<std::vector<Team>>().getReflectionInfo(ii);
 
-
-    std::vector<char> ta = {'a', 'b', 'c'};
-    std::vector<char> tb = {'a', 'b', 'c'};
-    const char *abc = "nihao ";
-    std::string cdf = "nihaoya ";
-    int iiiii = strlen(abc);
-    ta.assign(cdf.begin(), cdf.end());
-//    tb.assign(abc, 0);
-    tb.resize(strlen(abc));
-    std::memcpy(tb.data(), abc, strlen(abc));
-//    std::copy(abc, abc + strlen(abc) + 10, tb.data());
-
-    auto u1 = AliasHelper::getAliasFromType<User>();
-    auto u2 = AliasHelper::getAliasFromType<User>();
-    auto u3 = AliasHelper::getAliasFromType<Team>();
-    auto u4 = AliasHelper::getAliasFromType<User>();
-    auto u5 = AliasHelper::getAliasFromType<Team>();
     {
-//    auto name_ = EntityHelper::getProperty(&User::name);
-//    auto id_ = EntityHelper::getProperty(&User::id);
 
+        Example<Dept> example;
 
-//    auto b = &User::id;
-//    auto a = &User::team;
+        auto item1 = example.createCriteria();
+        item1->andEqualTo(&Dept::deptId, 1);
+        Mapper<Dept> userMapper;
+        auto depts = userMapper.selectByExample(example);
+        for (auto &d:depts) {
+            std::cout << *d << std::endl;
+        }
+    }
+
+    {
         Example<User> example;
         auto item1 = example.createCriteria();
-//    item1->andGreaterThan(&User::id, 1);
-//    item1->andLike(&User::name, "%i%");
         item1->andIn(&User::id, std::vector<int>({2, 1, 3}));
-//    item1->andEqualTo(&User::id, 2);
-//    item1->orIsNull(&Team::teamId);
         item1->andEqualTo(&Team::teamName, "teamA");
-//    item1->andGreaterThanOrEqualTo(&Team::teamId, 2);
-//    auto item2 = example.createCriteria();
-//    item2->andBetween(&User::name, "12", "456");
-//    item2->orGreaterThan(&User::name, "23llllll");
-//    example.orCriteria(item2);
         example.orderByAsc(&User::name);
         example.orderByDesc(&Team::teamId);
-//    auto res = example.getSelectStatementByExample();
-//    auto values = example.getPrepareValues();
         Mapper<User> userMapper;
         auto users = userMapper.selectByExample(example);
-        std::cout << users.size() << std::endl;
         for (auto &u:users) {
             std::cout << *u << std::endl;
         }
     }
-//
-////    bool v1 = TypeUtils::isCollection(std::vector<int>());
-////    bool v2 = TypeUtils::isCollection(std::set<int>());
-////    bool v3 = TypeUtils::isCollection(std::string());
-////    bool v4 = TypeUtils::isCollection(std::list<int>());
-////    bool v5 = TypeUtils::isCollection(1);
-//
-//    std::string a1 = "123";
-//    void *_a1 = (void *) &a1;
-//    std::string a22 = *(std::string *) _a1;
-//
-////    std::shared_ptr<User> u=std::make_shared<User>();
-////    auto iii2 = &User::id;
-////    auto a1111 = u.get()->*iii2;
-////    int a = 10;
-////    {
-////        std::shared_ptr<int> e1 = std::weak_ptr<int>(&a1111);
-////    }
-//
-//
+    getchar();
+
+
 //    auto name = StringUtils::camelhump2Underline("userName");
 //
 //

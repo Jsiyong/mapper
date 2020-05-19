@@ -17,22 +17,6 @@ class TypeUtils {
 
 private:
 
-    /**
-     * 将容器的值转为std::vector<Any>类型存储
-     * @tparam Collection
-     * @param collection
-     * @return
-     */
-    template<typename Collection>
-    static std::vector<Object> getValuesFromCollection(const Collection &collection) {
-        std::vector<Object> results;
-//        results.insert(results.end(), collection.begin(), collection.end());
-        for (const auto &c:collection) {
-            results.emplace_back(c);
-        }
-        return results;
-    }
-
 public:
 
     /**
@@ -42,23 +26,23 @@ public:
      * @return
      */
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::vector<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::Vector, getValuesFromCollection(value));
+    static bool isContainer(const std::vector<T> &value) {
+        return true;
     }
 
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::set<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::Set, getValuesFromCollection(value));
+    static bool isContainer(const std::set<T> &value) {
+        return true;
     }
 
     template<typename T>
-    static CollectionInfo getCollectionInfo(const std::list<T> &value) {
-        return CollectionInfo(CollectionInfo::CollectionType::List, getValuesFromCollection(value));
+    static bool isContainer(const std::list<T> &value) {
+        return true;
     }
 
     template<typename T>
-    static CollectionInfo getCollectionInfo(const T &t) {
-        return {};
+    static bool isContainer(const T &t) {
+        return false;
     }
 
 };

@@ -16,11 +16,13 @@
 struct Team {
     int teamId = 0;
     std::string teamName = "123";
+    int deptId = 0;
 
     friend std::ostream &operator<<(std::ostream &os, const Team &team) {
-        os << "teamId: " << team.teamId << " teamName: " << team.teamName;
+        os << "teamId: " << team.teamId << " teamName: " << team.teamName << " deptId: " << team.deptId;
         return os;
     }
+
 };
 
 template<>
@@ -34,10 +36,45 @@ public:
                                             JoinType::Null)),
                 std::make_pair(&Team::teamName,
                                EntityColumn(entity, &entity->teamName, "teamName", "team_name", ColumnType::Null,
+                                            KeySql::Null, JoinType::Null)),
+                std::make_pair(&Team::deptId,
+                               EntityColumn(entity, &entity->deptId, "deptId", "dept_id", ColumnType::Null,
                                             KeySql::Null, JoinType::Null))
         );
     }
 };
+
+struct Dept {
+    int deptId = 0;
+    std::string deptName = "123";
+    std::vector<Team> teams;
+
+    friend std::ostream &operator<<(std::ostream &os, const Dept &dept) {
+        os << "deptId: " << dept.deptId << " deptName: " << dept.deptName << " teams: " << dept.teams.size();
+        return os;
+    }
+
+};
+
+template<>
+class EntityWrapper<Dept> {
+public:
+    auto getReflectionInfo(Dept *entity) {
+        return std::make_tuple(
+                EntityTable(entity, "Dept", "dept"),
+                std::make_pair(&Dept::deptId,
+                               EntityColumn(entity, &entity->deptId, "deptId", "id", ColumnType::Null, KeySql::Null,
+                                            JoinType::Null)),
+                std::make_pair(&Dept::deptName,
+                               EntityColumn(entity, &entity->deptName, "deptName", "name", ColumnType::Null,
+                                            KeySql::Null, JoinType::Null)),
+                std::make_pair(&Dept::teams,
+                               EntityColumn(entity, &entity->teams, "team", "jid", ColumnType::Null,
+                                            KeySql::Null, JoinType::LeftJoin, &Team::deptId))
+        );
+    }
+};
+
 
 struct User {
     int id = 0;
@@ -61,8 +98,7 @@ public:
                                                        JoinType::Null)),
                 std::make_pair(&User::name,
                                EntityColumn(entity, &entity->name, "name", "name", ColumnType::Null, KeySql::Null,
-                                            JoinType::Null))
-                                            ,
+                                            JoinType::Null)),
                 //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
                 std::make_pair(&User::team,
                                EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,

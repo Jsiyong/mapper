@@ -36,17 +36,17 @@ public:
         }
         connector->execute();
         while (connector->next()) {
-            std::cout << "connector->next()" << std::endl;
             auto tmp = Example<T>();
             auto columnMap = tmp.getColumnAliasMap();
             for (int j = 0; j < connector->getRecords().size(); ++j) {
-                std::cout << connector->getRecords()[j] << std::endl;
+//                std::cout << connector->getRecords()[j] << std::endl;
                 auto c = columnMap[connector->getRecords()[j]];
                 c.bindValue2EntityField(connector->value(j));
             }
             results.push_back(tmp.getEntity());
         }
-        ConnectionPool::getInstance()->releaseConnection(connector);
+        //TODO 释放连接的时候需要同时清空连接的资源
+//        ConnectionPool::getInstance()->releaseConnection(connector);
         return results;
     }
 
