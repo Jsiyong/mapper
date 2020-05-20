@@ -18,38 +18,34 @@
  */
 class EntityHelper {
 private:
-    template<typename Tuple, size_t N>
-    struct ResultGetter {
-        /**
-         * 获取ResultMap
-         * @param tuple
-         * @param resultMap
-         */
-        template<typename Entity>
-        static void getResultMap(Entity *entity, const Tuple &tuple, std::shared_ptr<EntityTableMap> resultMap) {
-            //编译期递归
-            ResultGetter<Tuple, N - 1>::getResultMap(entity, tuple, resultMap);
-            //模板匹配
-            bind2ResultMap(entity, std::get<N - 1>(tuple), resultMap);
-        }
+
+    /**
+     * 比较通用的实体类元组获取器
+     */
+    struct EntityTupleGetter {
 
         /**
-         * 获取与t偏移位置相同的属性名
+         * 不是符合的类型,直接忽略
          * @tparam T
-         * @param tuple
+         * @tparam Entity
          * @param t
-         * @return
+         * @param property
+         * @param from
+         * @param to
          */
-        template<typename T>
-        static void getProperty(const Tuple &tuple, T t, std::string &property) {
-            ResultGetter<Tuple, N - 1>::getProperty(tuple, t, property);
-            auto val = std::get<N - 1>(tuple);
-            if (isMatchProperty(val, t)) {
-                property = getProperty(val);
+        template<typename T, typename Entity>
+        static void appendPropertyValues(const T &t, const std::string &property, const Entity *from, Entity *to) {}
+
+        template<typename R, typename T, typename Entity>
+        static void
+        appendPropertyValues(const std::pair<std::vector<R> T::*, EntityColumn> &pair, const std::string &property,
+                             const Entity *from, Entity *to) {
+            if (pair.second.getProperty() == property) {
+                for (const auto &item :from->*pair.first) {
+                    (to->*pair.first).push_back(item);
+                }
             }
         }
-
-    private:
 
         //获取属性名
         template<typename T>
@@ -76,7 +72,6 @@ private:
             return pair.first == u;
         }
 
-    private:
         template<typename Entity, typename T>
         static void bind2ResultMap(Entity *, const T &, std::shared_ptr<EntityTableMap>) {}
 
@@ -137,6 +132,45 @@ private:
         }
     };
 
+    template<typename Tuple, size_t N>
+    struct ResultGetter {
+        /**
+         * 获取ResultMap
+         * @param tuple
+         * @param resultMap
+         */
+        template<typename Entity>
+        static void getResultMap(Entity *entity, const Tuple &tuple, std::shared_ptr<EntityTableMap> resultMap) {
+            //编译期递归
+            ResultGetter<Tuple, N - 1>::getResultMap(entity, tuple, resultMap);
+            //模板匹配
+            EntityTupleGetter::bind2ResultMap(entity, std::get<N - 1>(tuple), resultMap);
+        }
+
+        /**
+         * 获取与t偏移位置相同的属性名
+         * @tparam T
+         * @param tuple
+         * @param t
+         * @return
+         */
+        template<typename T>
+        static void getProperty(const Tuple &tuple, T t, std::string &property) {
+            ResultGetter<Tuple, N - 1>::getProperty(tuple, t, property);
+            auto val = std::get<N - 1>(tuple);
+            if (EntityTupleGetter::isMatchProperty(val, t)) {
+                property = EntityTupleGetter::getProperty(val);
+            }
+        }
+
+        template<typename Entity>
+        static void
+        appendPropertyValues(const Tuple &tuple, const std::string &property, const Entity *from, Entity *to) {
+            ResultGetter<Tuple, N - 1>::appendPropertyValues(tuple, property, from, to);
+            EntityTupleGetter::appendPropertyValues(std::get<N - 1>(tuple), property, from, to);
+        }
+    };
+
     template<typename Tuple>
     struct ResultGetter<Tuple, 0> {
         template<typename Entity>
@@ -144,6 +178,9 @@ private:
 
         template<typename T>
         static void getProperty(const Tuple &, T, std::string &) {}
+
+        template<typename Entity>
+        static void appendPropertyValues(const Tuple &, const std::string &, const Entity *, Entity *) {}
     };
 
 
@@ -176,6 +213,13 @@ private:
         ResultGetter<decltype(tuple), sizeof...(Args)>::getResultMap(entity, tuple, resultMap);
     }
 
+    template<typename Entity, typename... Args>
+    static void
+    appendPropertyValues(const std::tuple<Args...> &tuple, const std::string &property, const Entity *from,
+                         Entity *to) {
+        ResultGetter<decltype(tuple), sizeof...(Args)>::appendPropertyValues(tuple, property, from, to);
+    }
+
 public:
 
     /**
@@ -205,6 +249,13 @@ public:
         auto entity = std::make_shared<Entity>();
         auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(entity.get());
         return getProperty(resultTuple, t);
+    }
+
+
+    template<typename Entity>
+    static void appendPropertyValues(const std::string &property, const Entity *from, Entity *to) {
+        auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(to);
+        appendPropertyValues(resultTuple, property, from, to);
     }
 };
 

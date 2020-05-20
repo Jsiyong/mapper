@@ -28,6 +28,9 @@ private:
     std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
     std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
 
+    EntityColumn keyColumn;
+    EntityColumn joinColumn;
+
     std::shared_ptr<OrderBy> orderBy = nullptr;//排序的
 
 private:
@@ -100,6 +103,15 @@ public:
         return res;
     }
 
+    const EntityColumn &getJoinColumn() const {
+        return joinColumn;
+    }
+
+    const EntityColumn &getKeyColumn() const {
+        return keyColumn;
+    }
+
+
 public:
     const std::shared_ptr<Entity> &getEntity() const {
         return entityClass;
@@ -123,6 +135,14 @@ public:
         //拆分实体列的信息
         for (auto &r :resultMap->getPropertyMap()) {
             this->propertyMap.insert(r);
+            //找出主键列
+            if (r.second.getColumnType() == ColumnType::Id) {
+                this->keyColumn = r.second;
+            }
+            if (r.second.getJoinType() != JoinType::Null) {
+                this->joinColumn = r.second;
+            }
+            /////////////////////////////////////////////////////////
             //找出连接属性是Join的,设置其连接信息
             if (r.second.getJoinType() != JoinType::Null) {
                 //设置连表的连接属性

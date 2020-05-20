@@ -54,7 +54,7 @@ struct Dept {
         for (int i = 0; i < dept.teams.size(); i++) {
             os << dept.teams[i];
             if (i < dept.teams.size() - 1)
-                os << ",";
+                os << " , ";
         }
         os << "]";
         return os;
@@ -69,7 +69,7 @@ public:
         return std::make_tuple(
                 EntityTable(entity, "Dept", "dept"),
                 std::make_pair(&Dept::deptId,
-                               EntityColumn(entity, &entity->deptId, "deptId", "id", ColumnType::Null, KeySql::Null,
+                               EntityColumn(entity, &entity->deptId, "deptId", "id", ColumnType::Id, KeySql::Null,
                                             JoinType::Null)),
                 std::make_pair(&Dept::deptName,
                                EntityColumn(entity, &entity->deptName, "deptName", "name", ColumnType::Null,

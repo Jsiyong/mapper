@@ -109,6 +109,10 @@ public:
         return typeIndex;
     }
 
+    ColumnType getColumnType() const {
+        return columnType;
+    }
+
     /**
      * 绑定value值到该对象的字段中
      * @param value

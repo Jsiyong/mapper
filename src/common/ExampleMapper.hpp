@@ -35,15 +35,44 @@ public:
             connector->bindValue(i, prepareValues[i]);
         }
         connector->execute();
+
+        std::map<int, int> idIndexMap;//key id value results的index
+
         while (connector->next()) {
             auto tmp = Example<T>();
             auto columnMap = tmp.getColumnAliasMap();
+            //找出连接的列team
+            auto joinColumn = tmp.getJoinColumn();
+            auto keyColumn = tmp.getKeyColumn();
+            int id = 0;
+
             for (int j = 0; j < connector->getRecords().size(); ++j) {
 //                std::cout << connector->getRecords()[j] << std::endl;
                 auto c = columnMap[connector->getRecords()[j]];
                 c.bindValue2EntityField(connector->value(j));
+
+                if (c.getColumnWithTableAlias() == keyColumn.getColumnWithTableAlias()) {
+                    id = connector->value(j).getValue<int>();
+                }
+
             }
-            results.push_back(tmp.getEntity());
+
+            //没有的话,直接加入
+            if (id != 0 && idIndexMap.count(id) <= 0) {
+                results.push_back(tmp.getEntity());
+                idIndexMap.insert(std::make_pair(id, results.size() - 1));
+            } else if (idIndexMap.count(id) > 0) {
+                //获取对应的实体
+                auto e = results[idIndexMap[id]];
+                EntityHelper::appendPropertyValues<T>(joinColumn.getProperty(), tmp.getEntity().get(), e.get());
+//
+//                //根据属性名找出偏移
+//                auto propertyOffset = EntityHelper::getPropertyOffset<T>(joinColumn.getProperty());
+//                int i = 10;
+
+            }
+
+
         }
         //TODO 释放连接的时候需要同时清空连接的资源
 //        ConnectionPool::getInstance()->releaseConnection(connector);
