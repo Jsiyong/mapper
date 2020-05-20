@@ -52,19 +52,21 @@ private:
         }
     }
 
-
-public:
-
     /**
-     * 通过Example获取查询的语句
-     * @return
+     * 生成orderBy
+     * @param sqlBuilder
      */
-    std::string getSelectStatementByExample() const {
-        auto sqlBuilder = std::make_shared<SQLBuilder>();
-        for (const auto &p:propertyMap) {
-            //用别名
-            sqlBuilder->SELECT(p.second.getColumnWithTableAlias() + " " + SQLConstants::AS + " " + p.second.getAlias());
+    void buildOrderBy(const std::shared_ptr<SQLBuilder> &sqlBuilder) const {
+        //处理排序
+        if (orderBy) {
+            for (auto &o: orderBy->getOrderBys()) {
+                sqlBuilder->ORDER_BY(o);
+            }
         }
+    }
+
+    //内部获取select from where后的语句
+    void buildFromWhereStatementByExample(const std::shared_ptr<SQLBuilder> &sqlBuilder) const {
         //表也要用别名
         sqlBuilder->FROM(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
         //处理外连接
@@ -77,13 +79,32 @@ public:
         }
         //处理条件
         buildOredCriteria(sqlBuilder);
-        //处理排序
-        if (orderBy) {
-            for (auto &o: orderBy->getOrderBys()) {
-                sqlBuilder->ORDER_BY(o);
-            }
-        }
+        buildOrderBy(sqlBuilder);
+    }
 
+public:
+    /**
+    * 通过Example获取查询多少数量的语句
+    * @return
+    */
+    std::string getSelectCountStatementByExample() const {
+        auto sqlBuilder = std::make_shared<SQLBuilder>();
+        sqlBuilder->SELECT(SQLConstants::COUNT);
+        buildFromWhereStatementByExample(sqlBuilder);
+        return sqlBuilder->toString();
+    }
+
+    /**
+     * 通过Example获取查询的语句
+     * @return
+     */
+    std::string getSelectStatementByExample() const {
+        auto sqlBuilder = std::make_shared<SQLBuilder>();
+        for (const auto &p:propertyMap) {
+            //用别名
+            sqlBuilder->SELECT(p.second.getColumnWithTableAlias() + " " + SQLConstants::AS + " " + p.second.getAlias());
+        }
+        buildFromWhereStatementByExample(sqlBuilder);
         return sqlBuilder->toString();
     }
 

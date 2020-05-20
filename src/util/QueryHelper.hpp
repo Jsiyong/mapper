@@ -10,6 +10,7 @@
 #include <entity/Iterable.hpp>
 #include <sql/ConnectionPool.hpp>
 #include <entity/EntityColumn.hpp>
+#include <guard/ConnectionGuard.hpp>
 
 /**
  * 查询的帮助类
@@ -29,19 +30,20 @@ public:
     template<typename Entity>
     static std::vector<Entity> select(const std::string &sql, const Iterable &args, std::vector<Entity> &results) {
         //首先第一步,获取数据库连接
-        auto connector = ConnectionPool::getInstance()->getConnection();
-        connector->prepare(sql);
+        ConnectionGuard connectionGuard;
+        auto connection = connectionGuard.getConnection();
+        connection->prepare(sql);
         //绑定
         for (int i = 0; i < args.size(); ++i) {
-            connector->bindValue(i, args[i]);
+            connection->bindValue(i, args[i]);
         }
         //执行数据库查询
-        connector->execute();
+        connection->execute();
 
         std::map<int, int> idIndexMap;//key id value results的index
 
         //循环获取结果集
-        while (connector->next()) {
+        while (connection->next()) {
             auto exampleTmp = Example<Entity>();
             auto columnMap = exampleTmp.getColumnAliasMap();
             //找出连接的列team
@@ -54,12 +56,12 @@ public:
             //TODO id暂时为Int型
             int id = 0;
 
-            for (int j = 0; j < connector->getRecords().size(); ++j) {
-                auto col = columnMap[connector->getRecords()[j]];
-                col.bindValue2EntityField(connector->value(j));
+            for (int j = 0; j < connection->getRecords().size(); ++j) {
+                auto col = columnMap[connection->getRecords()[j]];
+                col.bindValue2EntityField(connection->value(j));
                 //记录当前的id值
                 if (nullptr != keyColumn && col.getColumnWithTableAlias() == keyColumn->getColumnWithTableAlias()) {
-                    id = connector->value(j).getValue<int>();
+                    id = connection->value(j).getValue<int>();
                 }
             }
             //最普通的,没有容器类型的,只需要直接返回就行
@@ -83,10 +85,34 @@ public:
                 }
             }
         }
-
-        //TODO 释放连接的时候需要同时清空连接的资源
-//        ConnectionPool::getInstance()->releaseConnection(connector);
         return results;
+    }
+
+    /**
+     * 单纯的查询结果的封装
+     * @param sql 查询的sql语句
+     * @param args 查询的参数
+     * @param results 查询的结果,一行一行的结果
+     */
+    static void
+    select(const std::string &sql, const Iterable &args, std::vector<std::vector<Object>> &results) {
+        ConnectionGuard connectionGuard;
+        auto connection = connectionGuard.getConnection();
+        connection->prepare(sql);
+        //绑定
+        for (int i = 0; i < args.size(); ++i) {
+            connection->bindValue(i, args[i]);
+        }
+        //执行数据库查询
+        connection->execute();
+        //循环获取结果集
+        while (connection->next()) {
+            std::vector<Object> record;
+            for (int i = 0; i < connection->getRecords().size(); ++i) {
+                record.emplace_back(connection->value(i));
+            }
+            results.emplace_back(record);
+        }
     }
 };
 

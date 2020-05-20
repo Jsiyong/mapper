@@ -40,5 +40,7 @@ namespace SQLConstants {
     const static std::string ASC = "ASC";
 
     const static std::string ON = "ON";
+
+    const static std::string COUNT = "COUNT(1)";
 }
 #endif //MAPPER_SQLCONSTANTS_HPP

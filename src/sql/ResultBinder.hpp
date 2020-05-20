@@ -25,7 +25,8 @@ private:
     //类型与处理函数映射
     std::map<int, std::function<void(int)>> typeProcessMap = {
             {MYSQL_TYPE_LONG,       std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)},
-            {MYSQL_TYPE_VAR_STRING, std::bind(&ResultBinder::bindString, this, std::placeholders::_1)}
+            {MYSQL_TYPE_VAR_STRING, std::bind(&ResultBinder::bindString, this, std::placeholders::_1)},
+            {MYSQL_TYPE_LONGLONG,   std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)}
     };
 private:
     void bindInt(int index) {
@@ -62,7 +63,7 @@ public:
      */
     void bindValue(enum_field_types fieldTypes, int index) {
         if (typeProcessMap.find(fieldTypes) == typeProcessMap.end()) {
-            std::cerr << "[unsupported type]" << fieldTypes << std::endl;
+            std::cerr << "[unsupported type] " << fieldTypes << std::endl;
             return;
         }
         //调用绑定函数

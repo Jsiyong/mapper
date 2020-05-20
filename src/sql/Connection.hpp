@@ -20,6 +20,20 @@
  * mysql数据库连接
  */
 class Connection {
+private:
+    /**
+     * 清除资源内容
+     */
+    void clear() {
+        if (!mysqlRes)
+            mysql_free_result(mysqlRes);
+        if (!mysqlStmt)
+            mysql_stmt_free_result(mysqlStmt);
+        records.clear();
+        prepareBinder.reset();
+        resultBinder.reset();
+    }
+
 public:
     /**
     * 数据库连接的初始化配置
@@ -37,8 +51,6 @@ public:
             mysql_close(connection);
             connection = nullptr;
         }
-        if (!mysqlStmt)
-            mysql_stmt_free_result(mysqlStmt);
     }
 
     /**
@@ -206,7 +218,12 @@ public:
      */
     bool next() {
         //0表示正确,其他情况返回错误
-        return mysql_stmt_fetch(mysqlStmt) == 0;
+        if (mysql_stmt_fetch(mysqlStmt) != 0) {
+            //若没有下一个了,就清除资源
+            clear();
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -37,7 +37,8 @@ public:
      * @return
      */
     T selectOneByExample(const Example<T> &example) {
-
+        auto results = this->selectByExample(example);
+        return results.empty() ? T{} : results.front();
     }
 
     /**
@@ -46,7 +47,11 @@ public:
      * @return
      */
     int selectCountByExample(const Example<T> &example) {
-
+        std::vector<std::vector<Object>> results;
+        auto sql = example.getSelectCountStatementByExample();
+        auto prepareValues = example.getPrepareValues();
+        QueryHelper::select(sql, prepareValues, results);
+        return results.front().front().getValue<int>();
     }
 
     /////////////////////////// delete /////////////////////////////
