@@ -112,8 +112,11 @@ public:
      * 若是容器,获取容器的每一个值,转为Object类型
      * @return
      */
-    const std::vector<Object> &getValues() const {
-        return buff.values;
+    const std::vector<Object> &toVector() const {
+        if (isContainer()) {
+            return buff.values;
+        }
+        return {};
     }
 
     /**

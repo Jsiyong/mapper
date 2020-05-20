@@ -68,7 +68,7 @@ public:
         if (value.isContainer()) {
             this->listValue = true;
             //一个个插入
-            this->values.insert(this->values.end(), value.getValues().begin(), value.getValues().end());
+            this->values.insert(this->values.end(), value.toVector().begin(), value.toVector().end());
         } else {
             this->singleValue = true;
             this->values.emplace_back(value);

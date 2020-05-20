@@ -15,14 +15,6 @@
 #include <common/Mapper.hpp>
 #include <cstring>
 
-class ABC {
-public:
-    void A() {
-        ABC abc;
-        return;
-    }
-};
-
 int main() {
 
     {
@@ -33,7 +25,7 @@ int main() {
         Mapper<Dept> userMapper;
         auto depts = userMapper.selectByExample(example);
         for (auto &d:depts) {
-            std::cout << *d << std::endl;
+            std::cout << d << std::endl;
         }
     }
 
@@ -41,13 +33,13 @@ int main() {
         std::cout << "===================== user ============================================" << std::endl;
         Example<User> example;
         auto item1 = example.createCriteria();
-        item1->andIn(&User::id, std::vector<int>({2, 1, 3}));
+        item1->andIn(&User::id, std::set<int>{2, 1, 3});
         example.orderByAsc(&User::name);
         example.orderByDesc(&Team::teamId);
         Mapper<User> userMapper;
         auto users = userMapper.selectByExample(example);
         for (auto &u:users) {
-            std::cout << *u << std::endl;
+            std::cout << u << std::endl;
         }
     }
     getchar();

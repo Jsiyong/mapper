@@ -6,6 +6,7 @@
 #define MAPPER_ITERABLE_HPP
 
 
+#include <sql/SQLException.hpp>
 #include "Object.hpp"
 
 //包装了集合类
@@ -42,6 +43,18 @@ public:
     };
 
     Iterable() = default;
+
+    int size() const {
+        return this->buff.values.size();
+    }
+
+    const Object &operator[](int index) const {
+        if (index > size()) {
+            std::cerr << "[out of max index]" << std::endl;
+            throw MapperException("[out of max index]");
+        }
+        return this->buff.values[index];
+    }
 };
 
 #endif //MAPPER_ITERABLE_HPP
