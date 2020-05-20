@@ -28,8 +28,8 @@ private:
     std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
     std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
 
-    EntityColumn keyColumn;
-    EntityColumn joinColumn;
+    std::shared_ptr<EntityColumn> keyEntityColumn = nullptr;//主键列
+    std::vector<EntityColumn> joinEntityColumns;
 
     std::shared_ptr<OrderBy> orderBy = nullptr;//排序的
 
@@ -103,14 +103,13 @@ public:
         return res;
     }
 
-    const EntityColumn &getJoinColumn() const {
-        return joinColumn;
+    const std::shared_ptr<EntityColumn> &getKeyEntityColumn() const {
+        return keyEntityColumn;
     }
 
-    const EntityColumn &getKeyColumn() const {
-        return keyColumn;
+    const std::vector<EntityColumn> &getJoinEntityColumns() const {
+        return joinEntityColumns;
     }
-
 
 public:
     const std::shared_ptr<Entity> &getEntity() const {
@@ -137,10 +136,12 @@ public:
             this->propertyMap.insert(r);
             //找出主键列
             if (r.second.getColumnType() == ColumnType::Id) {
-                this->keyColumn = r.second;
+                this->keyEntityColumn = std::make_shared<EntityColumn>();
+                *this->keyEntityColumn = r.second;
             }
+            //找出连接的列
             if (r.second.getJoinType() != JoinType::Null) {
-                this->joinColumn = r.second;
+                this->joinEntityColumns.emplace_back(r.second);
             }
             /////////////////////////////////////////////////////////
             //找出连接属性是Join的,设置其连接信息

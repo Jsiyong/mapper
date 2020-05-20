@@ -37,42 +37,50 @@ public:
         connector->execute();
 
         std::map<int, int> idIndexMap;//key id value results的index
+        //找出连接的列team
+        auto joinColumns = example.getJoinEntityColumns();//连接的列,主要用于属性连接
+        auto keyColumn = example.getKeyEntityColumn();//主键列,主要用于唯一性判断
+        auto containerIter = std::find_if(joinColumns.begin(), joinColumns.end(), [](EntityColumn &entityColumn) {
+            return entityColumn.isContainer();
+        });
+
 
         while (connector->next()) {
             auto tmp = Example<T>();
             auto columnMap = tmp.getColumnAliasMap();
-            //找出连接的列team
-            auto joinColumn = tmp.getJoinColumn();
-            auto keyColumn = tmp.getKeyColumn();
+
+            //TODO id暂时为Int型
             int id = 0;
 
             for (int j = 0; j < connector->getRecords().size(); ++j) {
 //                std::cout << connector->getRecords()[j] << std::endl;
-                auto c = columnMap[connector->getRecords()[j]];
-                c.bindValue2EntityField(connector->value(j));
+                auto col = columnMap[connector->getRecords()[j]];
+                col.bindValue2EntityField(connector->value(j));
 
-                if (c.getColumnWithTableAlias() == keyColumn.getColumnWithTableAlias()) {
+                //记录当前的id值
+                if (nullptr != keyColumn && col.getColumnWithTableAlias() == keyColumn->getColumnWithTableAlias()) {
                     id = connector->value(j).getValue<int>();
                 }
-
             }
-
-            //没有的话,直接加入
-            if (id != 0 && idIndexMap.count(id) <= 0) {
+            //最普通的,没有容器类型的,只需要直接返回就行
+            if (containerIter == joinColumns.end()) {
                 results.push_back(tmp.getEntity());
+                continue;
+            }
+            //有容器类型的,需要合并
+            //没有的话,直接加入
+            if (0 != id && idIndexMap.count(id) <= 0) {
+                results.push_back(tmp.getEntity());
+                //记录插入的id相对应于列表的索引值
                 idIndexMap.insert(std::make_pair(id, results.size() - 1));
             } else if (idIndexMap.count(id) > 0) {
                 //获取对应的实体
                 auto e = results[idIndexMap[id]];
-                EntityHelper::appendPropertyValues<T>(joinColumn.getProperty(), tmp.getEntity().get(), e.get());
-//
-//                //根据属性名找出偏移
-//                auto propertyOffset = EntityHelper::getPropertyOffset<T>(joinColumn.getProperty());
-//                int i = 10;
-
+                //一个个插入
+                for (const auto &joinColumn:joinColumns) {
+                    EntityHelper::appendPropertyValues<T>(joinColumn.getProperty(), tmp.getEntity().get(), e.get());
+                }
             }
-
-
         }
         //TODO 释放连接的时候需要同时清空连接的资源
 //        ConnectionPool::getInstance()->releaseConnection(connector);

@@ -36,14 +36,27 @@ private:
         template<typename T, typename Entity>
         static void appendPropertyValues(const T &t, const std::string &property, const Entity *from, Entity *to) {}
 
+        /**
+         * 往字段中加入相对应的项
+         * @tparam R
+         * @tparam T
+         * @tparam Entity
+         * @param pair
+         * @param property
+         * @param from
+         * @param to
+         */
         template<typename R, typename T, typename Entity>
         static void
         appendPropertyValues(const std::pair<std::vector<R> T::*, EntityColumn> &pair, const std::string &property,
                              const Entity *from, Entity *to) {
             if (pair.second.getProperty() == property) {
-                for (const auto &item :from->*pair.first) {
-                    (to->*pair.first).push_back(item);
-                }
+                //循环插入
+                (to->*pair.first).insert(
+                        (to->*pair.first).end(),
+                        (from->*pair.first).begin(),
+                        (from->*pair.first).end()
+                );
             }
         }
 

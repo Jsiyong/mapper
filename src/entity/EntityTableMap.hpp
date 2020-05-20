@@ -19,7 +19,7 @@ class EntityTableMap {
 private:
     std::vector<EntityTable> entityTables;//实体类与表格信息,可能会连表,所以需要保存多个映射关系
     std::map<std::string, EntityColumn> propertyMap;//属性和列对应
-    std::set<std::string> keyProperties; //实体类主键属性
+    std::string keyPropertie; //实体类主键属性
     std::set<std::string> keyColumns;//实体类主键列
 
 public:
@@ -40,12 +40,8 @@ public:
         EntityTableMap::propertyMap = propertyMap;
     }
 
-    const std::set<std::string> &getKeyProperties() const {
-        return keyProperties;
-    }
-
-    void setKeyProperties(const std::set<std::string> &keyProperties) {
-        EntityTableMap::keyProperties = keyProperties;
+    const std::string &getKeyPropertie() const {
+        return keyPropertie;
     }
 
     const std::set<std::string> &getKeyColumns() const {

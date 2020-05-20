@@ -27,6 +27,7 @@ private:
     std::string joinProperty;//连接的外表的属性列
     std::string tableAlias;//所属table的别名,方便通过这个别名,区分字段所属的不同的table,因为还有连表查询
     std::string joinTableAlias;//连接的表的别名,方便通过该别名,找到该字段连接的表的信息
+    bool container = false;//该行是不是容器类型,如果是容器类型,需要做别的处理
 
 private:
     /**
@@ -59,6 +60,7 @@ public:
         this->keySql = keySql;
         this->joinType = joinType;
         this->alias = tableAlias + "_" + this->column;//同时获取别名
+        this->container = TypeUtils::isContainer(T{});
     }
 
     template<typename Entity, typename T, typename J>
@@ -125,6 +127,11 @@ public:
             *(std::string *) pProperty = value.getValue<std::string>();
         }
     }
+
+    bool isContainer() const {
+        return container;
+    }
+
 };
 
 #endif //MAPPER_ENTITYCOLUMN_HPP
