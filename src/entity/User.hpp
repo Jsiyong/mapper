@@ -50,7 +50,13 @@ struct Dept {
     std::vector<Team> teams;
 
     friend std::ostream &operator<<(std::ostream &os, const Dept &dept) {
-        os << "deptId: " << dept.deptId << " deptName: " << dept.deptName << " teams: " << dept.teams.size();
+        os << "deptId: " << dept.deptId << " deptName: " << dept.deptName << " teams: [";
+        for (int i = 0; i < dept.teams.size(); i++) {
+            os << dept.teams[i];
+            if (i < dept.teams.size() - 1)
+                os << ",";
+        }
+        os << "]";
         return os;
     }
 
@@ -69,7 +75,7 @@ public:
                                EntityColumn(entity, &entity->deptName, "deptName", "name", ColumnType::Null,
                                             KeySql::Null, JoinType::Null)),
                 std::make_pair(&Dept::teams,
-                               EntityColumn(entity, &entity->teams, "team", "jid", ColumnType::Null,
+                               EntityColumn(entity, &entity->teams, "team", "id", ColumnType::Null,
                                             KeySql::Null, JoinType::LeftJoin, &Team::deptId))
         );
     }

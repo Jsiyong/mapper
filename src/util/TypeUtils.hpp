@@ -17,7 +17,18 @@ class TypeUtils {
 
 private:
 
+
 public:
+    template<class T>
+    struct getType {
+        typedef T type;
+    };
+
+    //指针类型的偏特化,指针类型是其原类型
+    template<class T>
+    struct getType<T *> {
+        typedef T type;
+    };
 
     /**
      * 判断是不是集合类型

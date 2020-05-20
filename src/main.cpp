@@ -24,17 +24,9 @@ public:
 };
 
 int main() {
-    ABC abc;
-    abc.A();
-    Dept dept;
-    auto de = &Dept::teams;
-    auto ii = &(&dept->*de);
-    EntityWrapper<std::vector<Team>>().getReflectionInfo(ii);
 
     {
-
         Example<Dept> example;
-
         auto item1 = example.createCriteria();
         item1->andEqualTo(&Dept::deptId, 1);
         Mapper<Dept> userMapper;

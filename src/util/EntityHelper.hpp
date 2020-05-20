@@ -10,6 +10,7 @@
 #include <map>
 #include <entity/EntityTableMap.hpp>
 #include <entity/EntityWrapper.hpp>
+#include "TypeUtils.hpp"
 
 
 /**
@@ -96,10 +97,43 @@ private:
             propertyMap.insert(std::make_pair(pair.second.getProperty(), pair.second));
             //递归查找其他关联类型的resultMap
             //&entity->*pair.first ==>对应的自定义类型字段的指针
+            auto entityPropertyPtr = getEntityPropertyPtr(entity, pair);
             //关联的反射信息
-            auto relatedReflectionInfo = EntityWrapper<R>().getReflectionInfo(&(entity->*pair.first));
+            //其中,若是指针类型,其类型需要是指针类型的原先类型
+            auto relatedReflectionInfo = EntityWrapper<typename TypeUtils::getType<decltype(entityPropertyPtr)>::type>().getReflectionInfo(
+                    entityPropertyPtr);
             //递归获取结果集映射关系
-            EntityHelper::getResultMap(&(entity->*pair.first), relatedReflectionInfo, resultMap);
+            EntityHelper::getResultMap(entityPropertyPtr, relatedReflectionInfo, resultMap);
+        }
+
+        /**
+         * 获取实体类对应属性的指针
+         * @tparam Entity
+         * @tparam R
+         * @tparam T
+         * @param entity
+         * @param pair
+         * @return
+         */
+        template<typename Entity, typename R, typename T>
+        static auto getEntityPropertyPtr(Entity *entity, const std::pair<R T::*, EntityColumn> &pair) {
+            return &(entity->*pair.first);
+        }
+
+        /**
+         * 列表类型的要单独处理
+         * @tparam Entity
+         * @tparam R
+         * @tparam T
+         * @param entity
+         * @param pair
+         * @return
+         */
+        template<typename Entity, typename R, typename T>
+        static auto getEntityPropertyPtr(Entity *entity, const std::pair<std::vector<R> T::*, EntityColumn> &pair) {
+            //首先先在对应的位置上[该位置的成员是一个列表类型]加入一个项,再返回这个项的地址
+            (entity->*pair.first).emplace_back(R());
+            return &(entity->*pair.first).front();
         }
     };
 
