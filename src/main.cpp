@@ -24,13 +24,12 @@ public:
 };
 
 int main() {
-    Dept dept;
-    auto b = &dept->*(&Dept::teams);
 
     {
+        std::cout << "===================== dept ============================================" << std::endl;
         Example<Dept> example;
         auto item1 = example.createCriteria();
-        item1->andEqualTo(&Dept::deptId, 1);
+        item1->andGreaterThanOrEqualTo(&Dept::deptId, 1);
         Mapper<Dept> userMapper;
         auto depts = userMapper.selectByExample(example);
         for (auto &d:depts) {
@@ -39,10 +38,10 @@ int main() {
     }
 
     {
+        std::cout << "===================== user ============================================" << std::endl;
         Example<User> example;
         auto item1 = example.createCriteria();
         item1->andIn(&User::id, std::vector<int>({2, 1, 3}));
-        item1->andEqualTo(&Team::teamName, "teamA");
         example.orderByAsc(&User::name);
         example.orderByDesc(&Team::teamId);
         Mapper<User> userMapper;

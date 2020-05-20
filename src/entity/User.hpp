@@ -54,7 +54,7 @@ struct Dept {
         for (int i = 0; i < dept.teams.size(); i++) {
             os << dept.teams[i];
             if (i < dept.teams.size() - 1)
-                os << " , ";
+                os << " ; ";
         }
         os << "]";
         return os;
