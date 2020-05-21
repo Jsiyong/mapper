@@ -10,6 +10,7 @@
 #include <mysql.h>
 #include <functional>
 #include <iostream>
+#include <deque>
 
 /**
  * 结果集的绑定
@@ -21,6 +22,8 @@ private:
     std::vector<MYSQL_BIND> resultBinds;
 
     std::vector<Object> bindValues;//保存的任意类型的缓存
+
+    std::deque<bool> nulls = {false};//是不是空的
 
     //类型与处理函数映射
     std::map<int, std::function<void(int)>> typeProcessMap = {
@@ -34,6 +37,8 @@ private:
 
         resultBinds[index].buffer_type = MYSQL_TYPE_LONG;
         resultBinds[index].buffer = bindValues[index].getValuePtr();
+
+        resultBinds[index].is_null = &nulls[index];
     }
 
     void bindString(int index) {
@@ -41,7 +46,8 @@ private:
         bindValues[index].resize(STRING_MAX_LENGTH);
         resultBinds[index].buffer_type = MYSQL_TYPE_VAR_STRING;
         resultBinds[index].buffer = bindValues[index].getValuePtr();
-        resultBinds[index].buffer_length = MYSQL_TYPE_VAR_STRING;
+        resultBinds[index].buffer_length = STRING_MAX_LENGTH;
+        resultBinds[index].is_null = &nulls[index]; //是不是空的
     }
 
 public:
@@ -53,6 +59,7 @@ public:
     explicit ResultBinder(int resultBindNum) {
         resultBinds.resize(resultBindNum);
         bindValues.resize(resultBindNum);
+        nulls.resize(resultBindNum);
     }
 
 
@@ -76,6 +83,10 @@ public:
     * @return
     */
     Object value(int index) {
+        if (nulls[index]) {
+            //若是空的,需要清空东西
+            bindValues[index].clear();
+        }
         return bindValues[index];
     }
 

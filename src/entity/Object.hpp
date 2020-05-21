@@ -25,6 +25,7 @@ protected:
 
     std::type_index typeIndex = std::type_index(typeid(void));//存放的是值的类型
     bool container = false;//是否是一个容器值
+    bool null = false;//是不是空的
 
 protected:
     //专门供给子类调用的构造函数
@@ -54,11 +55,23 @@ public:
     Object() = default;
 
     /**
-     * 判断是否没有
+     * 判断是否没有,是不是空的
      * @return
      */
     bool isNull() {
-        return typeIndex == typeid(void);
+        return typeIndex == typeid(void) || null;
+    }
+
+    /**
+     * 清空该对象
+     */
+    void clear() {
+        this->buff.values.clear();
+        this->buff.intValue = 0;
+        this->buff.stringValue = {'\0'};
+        this->null = true;
+        this->typeIndex = typeid(void);
+        this->container = false;
     }
 
     /**

@@ -55,23 +55,44 @@ public:
             //TODO id暂时为Int型
             int id = 0;
 
+            std::set<std::string> nullJoinPropertySet;//存放所有空连接的字段的集合
+
             for (int j = 0; j < connection->getRecords().size(); ++j) {
                 auto col = columnMap[connection->getRecords()[j]];
+                Object value = connection->value(j);
+                if (value.isNull()) {
+                    //找出joinCoulmns的连接字段是否包含该列,若包含,则加入
+                    auto joinPropertyIter = std::find_if(joinColumns.begin(), joinColumns.end(),
+                                                         [&col](EntityColumn &entityColumn) {
+                                                             return entityColumn.getJoinProperty() == col.getProperty();
+                                                         });
+                    if (joinPropertyIter != joinColumns.end()) {
+                        //保存空的字段,方便还原无效行
+                        nullJoinPropertySet.insert(joinPropertyIter->getProperty());
+                    }
+                }
                 col.bindValue2EntityField(connection->value(j));
                 //记录当前的id值
                 if (nullptr != keyColumn && col.getColumnWithTableAlias() == keyColumn->getColumnWithTableAlias()) {
                     id = connection->value(j).getValue<int>();
                 }
             }
+            auto entityResult = *exampleTmp.getEntity();
+            //如果连接列 [即ON a.id=b.id 中b.id的值为空] 说明连接不到,需要清空连接列表
+            //然后再删除实体类的那一项生成的信息
+            for (auto &nullProperty:nullJoinPropertySet) {
+                //清除空的项
+                EntityHelper::clearPropertyValues<Entity>(nullProperty, &entityResult);
+            }
             //最普通的,没有容器类型的,只需要直接返回就行
             if (containerIter == joinColumns.end()) {
-                results.push_back(*exampleTmp.getEntity());
+                results.push_back(entityResult);
                 continue;
             }
             //有容器类型的,需要合并
             //没有的话,直接加入
             if (0 != id && idIndexMap.count(id) <= 0) {
-                results.push_back(*exampleTmp.getEntity());
+                results.push_back(entityResult);
                 //记录插入的id相对应于列表的索引值
                 idIndexMap.insert(std::make_pair(id, results.size() - 1));
             } else if (idIndexMap.count(id) > 0) {

@@ -34,7 +34,7 @@ private:
          * @param to
          */
         template<typename T, typename Entity>
-        static void appendPropertyValues(const T &t, const std::string &property, const Entity *from, Entity *to) {}
+        static void appendPropertyValues(const T &, const std::string &, const Entity *, Entity *) {}
 
         /**
          * 往字段中加入相对应的项
@@ -57,6 +57,19 @@ private:
                         (from->*pair.first).begin(),
                         (from->*pair.first).end()
                 );
+            }
+        }
+
+        template<typename T, typename Entity>
+        static void clearPropertyValues(const T &, const std::string &, Entity *) {}
+
+        template<typename R, typename T, typename Entity>
+        static void
+        clearPropertyValues(const std::pair<std::vector<R> T::*, EntityColumn> &pair, const std::string &property,
+                            Entity *entity) {
+            if (pair.second.getProperty() == property) {
+                //清除列表信息
+                (entity->*pair.first).clear();
             }
         }
 
@@ -182,6 +195,12 @@ private:
             ResultGetter<Tuple, N - 1>::appendPropertyValues(tuple, property, from, to);
             EntityTupleGetter::appendPropertyValues(std::get<N - 1>(tuple), property, from, to);
         }
+
+        template<typename Entity>
+        static void clearPropertyValues(const Tuple &tuple, const std::string &property, Entity *entity) {
+            ResultGetter<Tuple, N - 1>::clearPropertyValues(tuple, property, entity);
+            EntityTupleGetter::clearPropertyValues(std::get<N - 1>(tuple), property, entity);
+        }
     };
 
     template<typename Tuple>
@@ -194,6 +213,9 @@ private:
 
         template<typename Entity>
         static void appendPropertyValues(const Tuple &, const std::string &, const Entity *, Entity *) {}
+
+        template<typename Entity>
+        static void clearPropertyValues(const Tuple &, const std::string &, Entity *) {}
     };
 
 
@@ -233,6 +255,12 @@ private:
         ResultGetter<decltype(tuple), sizeof...(Args)>::appendPropertyValues(tuple, property, from, to);
     }
 
+    template<typename Entity, typename... Args>
+    static void
+    clearPropertyValues(const std::tuple<Args...> &tuple, const std::string &property, Entity *entity) {
+        ResultGetter<decltype(tuple), sizeof...(Args)>::clearPropertyValues(tuple, property, entity);
+    }
+
 public:
 
     /**
@@ -265,11 +293,32 @@ public:
     }
 
 
+    /**
+     * 往to中加入from的property字段内容
+     * @tparam Entity
+     * @param property
+     * @param from
+     * @param to
+     */
     template<typename Entity>
     static void appendPropertyValues(const std::string &property, const Entity *from, Entity *to) {
         auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(to);
         appendPropertyValues(resultTuple, property, from, to);
     }
+
+
+    /**
+     * 抹去entity中property属性的内容
+     * @tparam Entity
+     * @param property
+     * @param entity
+     */
+    template<typename Entity>
+    static void clearPropertyValues(const std::string &property, Entity *entity) {
+        auto resultTuple = EntityWrapper<Entity>().getReflectionInfo(entity);
+        clearPropertyValues(resultTuple, property, entity);
+    }
+
 };
 
 #endif //MAPPER_ENTITYHELPER_HPP
