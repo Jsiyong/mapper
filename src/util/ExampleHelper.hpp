@@ -28,15 +28,15 @@ public:
             answer += "";
         }
         if (criterion.isSingleValue()) {
-            answer += " ?";
+            answer += " " + SQLConstants::PLACEHOLDER;
         }
         if (criterion.isBetweenValue()) {
-            answer += " ? " + SQLConstants::AND + " ?";
+            answer += " " + SQLConstants::PLACEHOLDER + " " + SQLConstants::AND + " " + SQLConstants::PLACEHOLDER;
         }
         if (criterion.isListValue()) {
             answer += " (";
             for (int i = 0; i < criterion.getValues().size(); ++i) {
-                answer += 0 == i ? " ?" : " ,?";
+                answer += 0 == i ? " " + SQLConstants::PLACEHOLDER : " ," + SQLConstants::PLACEHOLDER;
             }
             answer += " )";
         }

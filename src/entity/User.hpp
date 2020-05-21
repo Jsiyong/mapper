@@ -49,6 +49,10 @@ struct Dept {
     std::string deptName = "123";
     std::vector<Team> teams;
 
+    Dept() = default;
+
+    Dept(int deptId, const std::string &deptName) : deptId(deptId), deptName(deptName) {}
+
     friend std::ostream &operator<<(std::ostream &os, const Dept &dept) {
         os << "deptId: " << dept.deptId << " deptName: " << dept.deptName << " teams: [";
         for (int i = 0; i < dept.teams.size(); i++) {
@@ -76,7 +80,7 @@ public:
                                             KeySql::Null, JoinType::Null)),
                 std::make_pair(&Dept::teams,
                                EntityColumn(entity, &entity->teams, "team", "id", ColumnType::Null,
-                                            KeySql::Null, JoinType::LeftJoin, &Team::deptId))
+                                            KeySql::Null, JoinType::OneToMany, &Team::deptId))
         );
     }
 };
@@ -108,7 +112,7 @@ public:
                 //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
                 std::make_pair(&User::team,
                                EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,
-                                            JoinType::LeftJoin, &Team::teamId))
+                                            JoinType::OneToOne, &Team::teamId))
         );
     }
 };

@@ -73,7 +73,8 @@ public:
      * @return
      */
     int updateByExample(const T &record, const Example<T> &example) {
-
+        auto sql = example.getUpdateStatementByExample();
+        return 1;
     }
 
     /**

@@ -42,5 +42,6 @@ namespace SQLConstants {
     const static std::string ON = "ON";
 
     const static std::string COUNT = "COUNT(1)";
+    const static std::string PLACEHOLDER = "?";//占位符
 }
 #endif //MAPPER_SQLCONSTANTS_HPP

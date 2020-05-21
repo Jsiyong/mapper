@@ -39,11 +39,12 @@ enum class Style {
 };
 
 /**
- * 表格的关联关系,主表,关联表等
+ * 表格的关联关系,一对一关联,一对多关联等
  */
 enum class JoinType {
     Null,//无连接,普通类型
-    LeftJoin//被左关联的表
+    OneToOne,//实体连接关系,一对一的关系
+    OneToMany//一对多的关系
 };
 
 #endif //MAPPER_ENTITYENUM_HPP

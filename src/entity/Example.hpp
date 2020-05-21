@@ -79,16 +79,35 @@ private:
         }
         //处理条件
         buildOredCriteria(sqlBuilder);
-        buildOrderBy(sqlBuilder);
     }
 
 public:
+
+    /**
+     * 获取更新的语句
+     * @return
+     */
+    std::string getUpdateStatementByExample() const {
+        std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
+        //首先拼接update语句,注意要加上别名
+        sqlBuilder->UPDATE(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
+        for (auto &entityProperty:entityPropertyMap) {
+            //不是一对多的关系才可以设置
+            if (entityProperty.second.getJoinType() != JoinType::OneToMany) {
+                sqlBuilder->SET(entityProperty.second.getColumnWithTableAlias() + " " + SQLConstants::EQUALl_TO + " " +
+                                SQLConstants::PLACEHOLDER);
+            }
+        }
+        buildOredCriteria(sqlBuilder);
+        return sqlBuilder->toString();
+    }
+
     /**
     * 通过Example获取查询多少数量的语句
     * @return
     */
     std::string getSelectCountStatementByExample() const {
-        auto sqlBuilder = std::make_shared<SQLBuilder>();
+        std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         sqlBuilder->SELECT(SQLConstants::COUNT);
         buildFromWhereStatementByExample(sqlBuilder);
         return sqlBuilder->toString();
@@ -99,12 +118,16 @@ public:
      * @return
      */
     std::string getSelectStatementByExample() const {
-        auto sqlBuilder = std::make_shared<SQLBuilder>();
+        std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         for (const auto &p:propertyMap) {
             //用别名
-            sqlBuilder->SELECT(p.second.getColumnWithTableAlias() + " " + SQLConstants::AS + " " + p.second.getAlias());
+            if (p.second.getJoinType() != JoinType::OneToMany) {
+                sqlBuilder->SELECT(
+                        p.second.getColumnWithTableAlias() + " " + SQLConstants::AS + " " + p.second.getAlias());
+            }
         }
         buildFromWhereStatementByExample(sqlBuilder);
+        buildOrderBy(sqlBuilder);//加上排序信息
         return sqlBuilder->toString();
     }
 

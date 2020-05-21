@@ -16,9 +16,7 @@
 #include <cstring>
 
 int main() {
-    std::shared_ptr<User> u=std::make_shared<User>();
 
-    u.reset();
     {
         std::cout << "===================== dept ============================================" << std::endl;
         Example<Dept> example;
@@ -31,6 +29,10 @@ int main() {
         }
         std::cout << "selectOneByExample " << userMapper.selectOneByExample(example) << std::endl;
         std::cout << "selectOneByExample " << userMapper.selectCountByExample(example) << std::endl;
+
+        Dept dept(1, "deptA11");
+
+        userMapper.updateByExample(dept, example);
     }
 
     {

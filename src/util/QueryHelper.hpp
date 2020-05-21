@@ -41,18 +41,17 @@ public:
         connection->execute();
 
         std::map<int, int> idIndexMap;//key id value results的index
+        auto exampleTmp = Example<Entity>();
+        auto columnMap = exampleTmp.getColumnAliasMap();
+        //找出连接的列team
+        auto joinColumns = exampleTmp.getJoinEntityColumns();//连接的列,主要用于属性连接
+        auto keyColumn = exampleTmp.getKeyEntityColumn();//主键列,主要用于唯一性判断
+        auto containerIter = std::find_if(joinColumns.begin(), joinColumns.end(), [](EntityColumn &entityColumn) {
+            return entityColumn.isContainer();
+        });
 
         //循环获取结果集
         while (connection->next()) {
-            auto exampleTmp = Example<Entity>();
-            auto columnMap = exampleTmp.getColumnAliasMap();
-            //找出连接的列team
-            auto joinColumns = exampleTmp.getJoinEntityColumns();//连接的列,主要用于属性连接
-            auto keyColumn = exampleTmp.getKeyEntityColumn();//主键列,主要用于唯一性判断
-            auto containerIter = std::find_if(joinColumns.begin(), joinColumns.end(), [](EntityColumn &entityColumn) {
-                return entityColumn.isContainer();
-            });
-
             //TODO id暂时为Int型
             int id = 0;
 
