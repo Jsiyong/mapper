@@ -53,7 +53,7 @@ public:
     EntityColumn(Entity *, T *pProperty, const std::string &property, const std::string &column,
                  ColumnType columnType, KeySql keySql, JoinType joinType):typeIndex(typeid(T)) {
         this->tableAlias = AliasHelper::getAliasFromType<Entity>();//先拿出实体类的别名,属性要加上类的别名,避免连表混乱
-        this->pProperty = pProperty;
+        this->pProperty = (void *) pProperty;
         this->property = tableAlias + "." + property;
         this->column = column;
         this->columnType = columnType;
@@ -126,6 +126,20 @@ public:
         if (this->getTypeIndex() == typeid(std::string)) {
             *(std::string *) pProperty = value.getValue<std::string>();
         }
+    }
+
+    /**
+    * 获取对象字段的值
+    * @param value
+    */
+    Object getEntityFieldValue() {
+        if (this->getTypeIndex() == typeid(int)) {
+            return Object(*(int *) pProperty);
+        }
+        if (this->getTypeIndex() == typeid(std::string)) {
+            return Object(*(std::string *) pProperty);
+        }
+        return {};
     }
 
     bool isContainer() const {

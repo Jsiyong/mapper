@@ -264,17 +264,15 @@ private:
 public:
 
     /**
-     * 获取Entity对象的ResultMap,并返回一个对象
+     * 获取Entity对象的ResultMap
      * @tparam Entity
      * @param resultMap
      * @return
      */
     template<typename Entity>
-    static std::shared_ptr<Entity> getResultMap(std::shared_ptr<EntityTableMap> resultMap) {
-        std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-        auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entity.get());
-        getResultMap(entity.get(), reflectionInfo, resultMap);
-        return entity;
+    static void getResultMap(Entity *entity, std::shared_ptr<EntityTableMap> resultMap) {
+        auto reflectionInfo = EntityWrapper<Entity>().getReflectionInfo(entity);
+        getResultMap(entity, reflectionInfo, resultMap);
     }
 
     /**

@@ -44,16 +44,16 @@ private:
         }
     }
 
-//    /**
-//     * 属性类型,可以是成员在对象中的偏移量
-//     * @param property
-//     * @param compareSql
-//     * @param isOffsetType 是否是偏移量类型: &A::a
-//     * @return
-//     */
-//    std::string condition(const std::string &property, const std::string &compareSql, bool isOffsetType = false) {
-//        return column(isOffsetType ? property : this->table->getAlias() + "." + property) + " " + compareSql;
-//    }
+    /**
+     * 属性类型,可以是成员在对象中的偏移量
+     * @param property
+     * @param compareSql
+     * @param isOffsetType 是否是偏移量类型: &A::a
+     * @return
+     */
+    std::string condition(const std::string &property, const std::string &compareSql) {
+        return column(property) + " " + compareSql;
+    }
 
     /**
      * 可以通过成员在对象中的偏移量获取
@@ -220,6 +220,30 @@ public:
         criteria.emplace_back(Criterion(condition, value));
         return this;
     }
+
+
+    /**
+     * 将此对象的不为空的字段参数作为相等查询条件
+     *
+     * @param param 参数对象
+     */
+    template<typename Object>
+    Criteria *andEqualTo(const Object &param) {
+        //获取该对象的信息
+        std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
+        //需要转为Object,不然会变成空类型
+        EntityHelper::getResultMap(const_cast<Object *>(&param), resultMap);
+        for (auto &property :resultMap->getPropertyMap()) {
+            //如果是普通类型,便添加
+            if (property.second.getJoinType() != JoinType::OneToMany
+                && property.second.getTableAlias() == table->getAlias()) {
+                //只包含本表的数据
+                this->andEqualTo(property.second.getProperty(), property.second.getEntityFieldValue());
+            }
+        }
+        return this;
+    }
+
 
     ////////////////////// or ///////////////////////////////
     template<typename Property>

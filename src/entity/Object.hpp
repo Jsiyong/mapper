@@ -25,32 +25,32 @@ protected:
 
     std::type_index typeIndex = std::type_index(typeid(void));//存放的是值的类型
     bool container = false;//是否是一个容器值
-    bool null = false;//是不是空的
+    bool null = true;//是不是空的
 
 protected:
     //专门供给子类调用的构造函数
-    Object(std::type_index typeIndex, bool container)
-            : typeIndex(typeIndex), container(container) {}
+    Object(std::type_index typeIndex, bool container, bool null)
+            : typeIndex(typeIndex), container(container), null(null) {}
 
 public:
     //创建一个相对应类型的Object,构造函数的形式
     Object(const std::type_index &typeIndex) : typeIndex(typeIndex) {}
 
     //将可以转为std::string类型,都归入std::string类型
-    Object(const std::string &value) : typeIndex(typeid(std::string)) {
+    Object(const std::string &value) : typeIndex(typeid(std::string)), null(false) {
         buff.stringValue.assign(value.begin(), value.end());
         buff.stringValue.emplace_back('\0');//必须加入结束符,避免之后不必要的错误
     };
 
     //将可以转为const char*类型,也都归入std::string类型
-    Object(const char *value) : typeIndex(typeid(std::string)) {
+    Object(const char *value) : typeIndex(typeid(std::string)), null(false) {
         buff.stringValue.resize(strlen(value));
         std::memcpy(buff.stringValue.data(), value, strlen(value));
         buff.stringValue.emplace_back('\0');//必须加入结束符,避免之后不必要的错误
     };
 
     //将可以转为int类型,都归入int类型
-    Object(int value) : typeIndex(typeid(int)) { buff.intValue = value; };
+    Object(int value) : typeIndex(typeid(int)), null(false) { buff.intValue = value; };
 
     Object() = default;
 

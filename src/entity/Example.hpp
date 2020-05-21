@@ -23,7 +23,7 @@ class Example {
 private:
     std::vector<std::shared_ptr<Criteria>> oredCriteria;//标准列表
     std::map<std::string, EntityColumn> propertyMap; //属性和列对应,是所有的,包括连接出来的
-    std::shared_ptr<Entity> entityClass = nullptr;//实体类
+    std::shared_ptr<Entity> entityClass = std::make_shared<Entity>();//实体类
     EntityTable table;//该实体类对应的表
     std::map<std::string, JoinEntityTable> joinTableMap;//该实体类关联的表集合,key为表的别名
     std::map<std::string, EntityColumn> entityPropertyMap; //属性和列对应,是当前实体类的,不包括连接出来的
@@ -84,40 +84,58 @@ private:
 public:
 
     /**
-     * 获取更新的语句
+     * 获取更新的上下文,包括更新语句和更新的值
      * @return
      */
-    std::string getUpdateStatementByExample() const {
+    std::pair<std::string, std::vector<Object>> getUpdateContextByExample(const Entity &param) const {
         std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         //首先拼接update语句,注意要加上别名
         sqlBuilder->UPDATE(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
-        for (auto &entityProperty:entityPropertyMap) {
+        //专门是update语句的Criteria
+        //获取该对象的信息
+        std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
+        std::shared_ptr<Criteria> updateCriteria = std::make_shared<Criteria>(
+                const_cast<decltype(propertyMap) *>(&propertyMap),
+                const_cast<decltype(table) *>(&table));;
+
+        //需要转为Object,不然会变成空类型
+        EntityHelper::getResultMap(const_cast<Entity *>(&param), resultMap);
+        for (auto &entityProperty:resultMap->getPropertyMap()) {
             //不是一对多的关系才可以设置
-            if (entityProperty.second.getJoinType() != JoinType::OneToMany) {
+            if (entityProperty.second.getJoinType() != JoinType::OneToMany
+                && entityProperty.second.getTableAlias() == this->table.getAlias()) {//不是自己的表也不算
                 sqlBuilder->SET(entityProperty.second.getColumnWithTableAlias() + " " + SQLConstants::EQUALl_TO + " " +
                                 SQLConstants::PLACEHOLDER);
+                updateCriteria->andEqualTo(entityProperty.second.getProperty(),
+                                           entityProperty.second.getEntityFieldValue());
             }
         }
+        auto updateCriteriaValues = ExampleHelper::getValuesFromOredCriteria({updateCriteria});
+
         buildOredCriteria(sqlBuilder);
-        return sqlBuilder->toString();
+        //where添加的标准的值
+        auto whereCriteriaValues = ExampleHelper::getValuesFromOredCriteria(this->oredCriteria);
+        //合并条件
+        updateCriteriaValues.insert(updateCriteriaValues.end(), whereCriteriaValues.begin(), whereCriteriaValues.end());
+        return std::make_pair(sqlBuilder->toString(), updateCriteriaValues);
     }
 
     /**
-    * 通过Example获取查询多少数量的语句
+    * 通过Example获取查询多少数量的上下文
     * @return
     */
-    std::string getSelectCountStatementByExample() const {
+    std::pair<std::string, std::vector<Object>> getSelectCountContextByExample() const {
         std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         sqlBuilder->SELECT(SQLConstants::COUNT);
         buildFromWhereStatementByExample(sqlBuilder);
-        return sqlBuilder->toString();
+        return std::make_pair(sqlBuilder->toString(), ExampleHelper::getValuesFromOredCriteria(this->oredCriteria));
     }
 
     /**
-     * 通过Example获取查询的语句
+     * 通过Example获取查询的上下文
      * @return
      */
-    std::string getSelectStatementByExample() const {
+    std::pair<std::string, std::vector<Object>> getSelectContextByExample() const {
         std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         for (const auto &p:propertyMap) {
             //用别名
@@ -128,15 +146,7 @@ public:
         }
         buildFromWhereStatementByExample(sqlBuilder);
         buildOrderBy(sqlBuilder);//加上排序信息
-        return sqlBuilder->toString();
-    }
-
-    /**
-     * 获取该Example传入的所有预处理的参数值
-     * @return
-     */
-    std::vector<Object> getPrepareValues() const {
-        return ExampleHelper::getValuesFromOredCriteria(this->oredCriteria);
+        return std::make_pair(sqlBuilder->toString(), ExampleHelper::getValuesFromOredCriteria(this->oredCriteria));
     }
 
     std::map<std::string, EntityColumn> getColumnAliasMap() const {
@@ -165,7 +175,7 @@ public:
      */
     Example() {
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
-        this->entityClass = EntityHelper::getResultMap<Entity>(resultMap);
+        EntityHelper::getResultMap(this->entityClass.get(), resultMap);
         //拆分表信息
         for (auto &t: resultMap->getEntityTables()) {
             //若当前类的别名和t的别名一致,说明是当前类,否则是关联的类
