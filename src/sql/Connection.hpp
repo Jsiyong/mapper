@@ -70,6 +70,14 @@ public:
     }
 
     /**
+     * 返回最后插入的数据库id
+     * @return
+     */
+    int getLastInsertId() {
+        return (int) mysql_insert_id(connection);
+    }
+
+    /**
      * 连接数据库
      * @return
      */
@@ -158,18 +166,22 @@ public:
 
         //获取结果集元数据
         mysqlRes = mysql_stmt_result_metadata(mysqlStmt);
-        auto columnNum = mysql_num_fields(mysqlRes);
-        resultBinder = std::make_shared<ResultBinder>(columnNum);
-        //根据表元数据绑定结果集
-        for (int i = 0; i < mysqlRes->field_count; i++) {
-            resultBinder->bindValue(mysqlRes->fields[i].type, i);
-            this->records.emplace_back(mysqlRes->fields[i].name);
+        //若有查询结果,则绑定查询结果集,否则直接执行查询语句
+        //插入/更新/删除语句没有查询结果集
+        if (mysqlRes) {
+            auto columnNum = mysql_num_fields(mysqlRes);
+            resultBinder = std::make_shared<ResultBinder>(columnNum);
+            //根据表元数据绑定结果集
+            for (int i = 0; i < mysqlRes->field_count; i++) {
+                resultBinder->bindValue(mysqlRes->fields[i].type, i);
+                this->records.emplace_back(mysqlRes->fields[i].name);
 //            std::cout << "name:" << mysqlRes->fields[i].name << " type: " << mysqlRes->fields[i].type << std::endl;
-        }
-        //绑定查询结果
-        if (mysql_stmt_bind_result(mysqlStmt, &resultBinder->getBindResult()[0])) {
-            setLastError("mysql_stmt_bind_result");
-            return false;
+            }
+            //绑定查询结果
+            if (mysql_stmt_bind_result(mysqlStmt, &resultBinder->getBindResult()[0])) {
+                setLastError("mysql_stmt_bind_result");
+                return false;
+            }
         }
 
         if (mysql_stmt_execute(mysqlStmt)) {

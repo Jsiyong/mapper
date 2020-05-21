@@ -84,10 +84,22 @@ private:
 public:
 
     /**
-     * 获取更新的上下文,包括更新语句和更新的值
+     * 获取删除语句的上下文
      * @return
      */
-    std::pair<std::string, std::vector<Object>> getUpdateContextByExample(const Entity &param) const {
+    std::pair<std::string, std::vector<Object>> getDeleteContextByExample() const {
+        std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
+        sqlBuilder->DELETE_FROM(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
+        buildOredCriteria(sqlBuilder);
+        return std::make_pair(sqlBuilder->toString(), ExampleHelper::getValuesFromOredCriteria(this->oredCriteria));
+    }
+
+    /**
+     * 获取更新的上下文,包括更新语句和更新的值
+     * @selective 若是true,只更新不是null的属性值
+     * @return
+     */
+    std::pair<std::string, std::vector<Object>> getUpdateContextByExample(const Entity &param, bool selective) const {
         std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
         //首先拼接update语句,注意要加上别名
         sqlBuilder->UPDATE(table.getTableName() + " " + SQLConstants::AS + " " + table.getAlias());
@@ -103,7 +115,11 @@ public:
         for (auto &entityProperty:resultMap->getPropertyMap()) {
             //不是一对多的关系才可以设置
             if (entityProperty.second.getJoinType() != JoinType::OneToMany
-                && entityProperty.second.getTableAlias() == this->table.getAlias()) {//不是自己的表也不算
+                && entityProperty.second.getTableAlias() == this->table.getAlias()//不是自己的表也不算
+                && entityProperty.second.getColumnType() != ColumnType::Id) {//ID列也不能更改
+                if (selective && entityProperty.second.isNull()) {
+                    continue;
+                }
                 sqlBuilder->SET(entityProperty.second.getColumnWithTableAlias() + " " + SQLConstants::EQUALl_TO + " " +
                                 SQLConstants::PLACEHOLDER);
                 updateCriteria->andEqualTo(entityProperty.second.getProperty(),

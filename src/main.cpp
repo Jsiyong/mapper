@@ -27,12 +27,15 @@ int main() {
         for (auto &d:depts) {
             std::cout << d << std::endl;
         }
+        Example<Dept> example2;
+        auto item2 = example2.createCriteria();
+        item2->andEqualTo(&Dept::deptId, 1);
         std::cout << "selectOneByExample " << userMapper.selectOneByExample(example) << std::endl;
         std::cout << "selectOneByExample " << userMapper.selectCountByExample(example) << std::endl;
-
-        Dept dept(1, "deptA11");
-
-        userMapper.updateByExample(dept, example);
+        std::cout << "updateByExample " << userMapper.updateByExample(Dept(1, "deptA1"), example2) << std::endl;
+        std::cout << "updateByExampleSelective " << userMapper.updateByExampleSelective(Dept(1, ""), example2)
+                  << std::endl;
+        std::cout << "deleteByExample " << userMapper.deleteByExample(example2) << std::endl;
     }
 
     {

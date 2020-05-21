@@ -142,6 +142,17 @@ public:
         return {};
     }
 
+    /**
+     * 判断列是否为空,暂时只对std::string类型做比较
+     * @return
+     */
+    bool isNull() {
+        if (this->getTypeIndex() == typeid(std::string)) {
+            return ((std::string *) pProperty)->empty();
+        }
+        return false;
+    }
+
     bool isContainer() const {
         return container;
     }

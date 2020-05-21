@@ -17,6 +17,27 @@
  */
 class QueryHelper {
 private:
+
+    /**
+     * 数据库公共的查询的步骤的封装
+     * @param connection
+     * @param sql
+     * @param args
+     * @return
+     */
+    static bool
+    prepareExecute(const std::shared_ptr<Connection> &connection, const std::string &sql, const Iterable &args) {
+        if (!connection->prepare(sql)) {
+            return false;
+        }
+        //绑定
+        for (int i = 0; i < args.size(); ++i) {
+            connection->bindValue(i, args[i]);
+        }
+        //执行数据库查询
+        return connection->execute();
+    }
+
 public:
 
     /**
@@ -28,17 +49,13 @@ public:
      * @return
      */
     template<typename Entity>
-    static std::vector<Entity> select(const std::string &sql, const Iterable &args, std::vector<Entity> &results) {
+    static void select(const std::string &sql, const Iterable &args, std::vector<Entity> &results) {
         //首先第一步,获取数据库连接
         ConnectionGuard connectionGuard;
         auto connection = connectionGuard.getConnection();
-        connection->prepare(sql);
-        //绑定
-        for (int i = 0; i < args.size(); ++i) {
-            connection->bindValue(i, args[i]);
+        if (!prepareExecute(connection, sql, args)) {
+            return;
         }
-        //执行数据库查询
-        connection->execute();
 
         std::map<int, int> idIndexMap;//key id value results的index
         auto exampleTmp = Example<Entity>();
@@ -105,7 +122,6 @@ public:
                 }
             }
         }
-        return results;
     }
 
     /**
@@ -118,13 +134,10 @@ public:
     select(const std::string &sql, const Iterable &args, std::vector<std::vector<Object>> &results) {
         ConnectionGuard connectionGuard;
         auto connection = connectionGuard.getConnection();
-        connection->prepare(sql);
-        //绑定
-        for (int i = 0; i < args.size(); ++i) {
-            connection->bindValue(i, args[i]);
+        if (!prepareExecute(connection, sql, args)) {
+            return;
         }
-        //执行数据库查询
-        connection->execute();
+
         //循环获取结果集
         while (connection->next()) {
             std::vector<Object> record;
@@ -133,6 +146,22 @@ public:
             }
             results.emplace_back(record);
         }
+    }
+
+
+    /**
+     * 执行更新,删除语句,插入语句,返回<first,second>: first 受影响的行数,second 最后一次插入的id
+     * @param sql
+     * @param args
+     * @return
+     */
+    static std::pair<int, int> execute(const std::string &sql, const Iterable &args) {
+        ConnectionGuard connectionGuard;
+        auto connection = connectionGuard.getConnection();
+        if (!prepareExecute(connection, sql, args)) {
+            return {};
+        }
+        return std::make_pair(connection->getLastAffectedRows(), connection->getLastInsertId());
     }
 };
 

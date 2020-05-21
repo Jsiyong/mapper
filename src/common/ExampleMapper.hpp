@@ -27,7 +27,8 @@ public:
     std::vector<T> selectByExample(const Example<T> &example) {
         std::vector<T> results;
         auto selectContext = example.getSelectContextByExample();
-        return QueryHelper::select(selectContext.first, selectContext.second, results);
+        QueryHelper::select(selectContext.first, selectContext.second, results);
+        return results;
     }
 
     /**
@@ -59,7 +60,8 @@ public:
      * @return
      */
     int deleteByExample(const Example<T> &example) {
-
+        auto deleteContext = example.getDeleteContextByExample();
+        return QueryHelper::execute(deleteContext.first, deleteContext.second).first;
     }
 
     /////////////////////////// update /////////////////////////////
@@ -68,22 +70,22 @@ public:
      * 根据Example条件更新实体`record`包含的全部属性，null值会被更新
      * @param record
      * @param example
-     * @return
+     * @return 受影响的行数
      */
     int updateByExample(const T &record, const Example<T> &example) {
-        auto updateContext = example.getUpdateContextByExample(record);
-
-        return 1;
+        auto updateContext = example.getUpdateContextByExample(record, false);
+        return QueryHelper::execute(updateContext.first, updateContext.second).first;
     }
 
     /**
-     * 根据Example条件更新实体`record`包含的不是null的属性值
+     * 根据Example条件更新实体`record`包含的不是null的属性值,暂时只有std::string字段有效,int型字段不算
      * @param record
      * @param example
      * @return
      */
     int updateByExampleSelective(const T &record, const Example<T> &example) {
-
+        auto updateContext = example.getUpdateContextByExample(record, true);
+        return QueryHelper::execute(updateContext.first, updateContext.second).first;
     }
 
 };
