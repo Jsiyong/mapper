@@ -108,6 +108,14 @@ public:
         return nullptr;
     }
 
+    /**
+     * 是否为空,可以通过此字段地址修改内存内容
+     * @return
+     */
+    bool *isNullPtr() const {
+        return (bool *) &this->null;
+    }
+
     const std::type_index &getTypeIndex() const {
         return typeIndex;
     }
@@ -126,10 +134,7 @@ public:
      * @return
      */
     const std::vector<Object> &toVector() const {
-        if (isContainer()) {
-            return buff.values;
-        }
-        return {};
+        return buff.values;
     }
 
     /**
