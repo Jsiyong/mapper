@@ -28,6 +28,7 @@ private:
     std::map<int, std::function<void(int)>> typeProcessMap = {
             {MYSQL_TYPE_LONG,       std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)},
             {MYSQL_TYPE_VAR_STRING, std::bind(&ResultBinder::bindString, this, std::placeholders::_1)},
+            {MYSQL_TYPE_LONGLONG,   std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)},
             {MYSQL_TYPE_DATETIME,   std::bind(&ResultBinder::bindTime, this, std::placeholders::_1)}
     };
 private:

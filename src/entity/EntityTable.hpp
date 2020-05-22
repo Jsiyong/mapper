@@ -12,6 +12,7 @@
 #include <string>
 #include <memory>
 #include <util/AliasHelper.hpp>
+#include <util/StringUtils.hpp>
 
 
 /**
@@ -23,6 +24,7 @@ private:
     std::string className;//类名
     std::string alias;//数据库表的别名,为系统自动分配,默认生成的别名
 
+
 public:
     EntityTable() = default;
 
@@ -31,6 +33,18 @@ public:
             : tableName(std::move(tableName)),
               className(std::move(className)) {
         alias = AliasHelper::getAliasFromType<Entity>();//别名
+    }
+
+    /**
+     * 若只提供类名,则表名默认是类名的下划线
+     * @tparam Entity
+     * @param className
+     */
+    template<typename Entity>
+    EntityTable(Entity *, std::string className)
+            :className(std::move(className)) {
+        alias = AliasHelper::getAliasFromType<Entity>();//别名
+        tableName = StringUtils::camelhump2Underline(this->className);//默认是驼峰转下划线命名法
     }
 
 public:

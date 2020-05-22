@@ -9,6 +9,7 @@
 #include <typeindex>
 #include <util/EntityHelper.hpp>
 #include <util/AliasHelper.hpp>
+#include <util/StringUtils.hpp>
 #include "EntityEnum.hpp"
 
 /**
@@ -67,7 +68,8 @@ public:
 
     template<typename Entity, typename T>
     EntityColumn(Entity *, T *pProperty, const std::string &property, const std::string &column,
-                 ColumnType columnType, KeySql keySql, JoinType joinType):typeIndex(typeid(T)) {
+                 ColumnType columnType, KeySql keySql, JoinType joinType) {
+        this->typeIndex = typeid(T);
         this->tableAlias = AliasHelper::getAliasFromType<Entity>();//先拿出实体类的别名,属性要加上类的别名,避免连表混乱
         this->pProperty = (void *) pProperty;
         this->property = tableAlias + "." + property;
@@ -81,13 +83,61 @@ public:
 
     template<typename Entity, typename T, typename J>
     EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
-                 ColumnType columnType, KeySql keySql, JoinType joinType, const J joinColunm)
-            :typeIndex(typeid(T)) {
+                 ColumnType columnType, KeySql keySql, JoinType joinType, const J joinColunm) {
         new(this)EntityColumn(entity, pProperty, property, column, columnType, keySql, joinType);
         //获取连接属性名和表别
         this->getJoinPropertyAndTableAlias(joinColunm, this->joinProperty, this->joinTableAlias);
         this->getJoinValue(this->joinValue, pProperty, joinColunm);
     }
+
+    template<typename Entity, typename T, typename J>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
+                 JoinType joinType, const J joinColunm) {
+        new(this)EntityColumn(entity, pProperty, property, column, ColumnType::Null, KeySql::Null,
+                              joinType, joinColunm);
+    }
+
+    template<typename Entity, typename T, typename J>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, JoinType joinType, const J joinColunm) {
+        new(this)EntityColumn(entity, pProperty, property,
+                              StringUtils::camelhump2Underline(property), joinType, joinColunm);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
+                 ColumnType columnType, KeySql keySql) {
+        new(this)EntityColumn(entity, pProperty, property, column, columnType, keySql, JoinType::Null);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
+                 ColumnType columnType) {
+        new(this)EntityColumn(entity, pProperty, property, column, columnType,
+                              columnType == ColumnType::Id ? KeySql::Id : KeySql::Null);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column) {
+        new(this)EntityColumn(entity, pProperty, property, column, ColumnType::Null);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, ColumnType columnType, KeySql keySql) {
+        new(this)EntityColumn(entity, pProperty, property,
+                              StringUtils::camelhump2Underline(property), columnType, keySql);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property, ColumnType columnType) {
+        new(this)EntityColumn(entity, pProperty, property, StringUtils::camelhump2Underline(property), columnType,
+                              columnType == ColumnType::Id ? KeySql::Id : KeySql::Null);
+    }
+
+    template<typename Entity, typename T>
+    EntityColumn(Entity *entity, T *pProperty, const std::string &property) {
+        new(this)EntityColumn(entity, pProperty, property, StringUtils::camelhump2Underline(property));
+    }
+
 
     const std::string &getColumn() const {
         return column;

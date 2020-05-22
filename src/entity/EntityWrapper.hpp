@@ -14,32 +14,6 @@
  */
 template<typename Entity>
 class EntityWrapper {
-private:
-    /**
-     * 如果是列表类型,取出其中的元素出来继续获取
-     * @tparam T
-     * @param entities
-     * @return
-     */
-//    template<typename T>
-//    auto getReflectionInfoInternal(std::vector<T> *entities) {
-//        std::shared_ptr<T> entity = std::make_shared<T>();
-//        auto reflectionInfo = EntityWrapper<T>().getReflectionInfo(entity.get());
-////        return getReflectionInfo(entity.get());
-//        return reflectionInfo;
-//    }
-
-    /**
-     * 如果是其他类型,返回空
-     * @tparam T
-     * @param entities
-     * @return
-     */
-    template<typename T>
-    void *getReflectionInfoInternal(T entities) {
-        return nullptr;
-    }
-
 public:
     /**
      * 获取实体类的反射信息
@@ -48,6 +22,22 @@ public:
     void *getReflectionInfo(Entity *entity) {
         return nullptr;
     }
+};
+
+#define PropertyMap(propert, ...)\
+std::make_pair(&EntityClass::propert, EntityColumn(entity, &entity->propert, #propert, ##__VA_ARGS__))
+
+#define EntityMap(Entity, ...)\
+std::make_pair(Entity{},EntityTable((Entity*)nullptr, #Entity,##__VA_ARGS__))
+
+#define ResultMap(EntityTable, ...)\
+template<>\
+class EntityWrapper<decltype(EntityTable.first)> {\
+public:\
+    auto getReflectionInfo(decltype(EntityTable.first) *entity) {\
+        using EntityClass = decltype(EntityTable.first);\
+        return std::make_tuple(EntityTable.second,##__VA_ARGS__);\
+    }\
 };
 
 #endif //MAPPER_ENTITYWRAPPER_HPP

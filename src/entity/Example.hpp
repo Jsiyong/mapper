@@ -275,7 +275,7 @@ public:
         for (auto &r :resultMap->getPropertyMap()) {
             this->propertyMap.insert(r);
             //找出主键列
-            if (r.second.getColumnType() == ColumnType::Id) {
+            if (r.second.getColumnType() == ColumnType::Id && r.second.getTableAlias() == this->table.getAlias()) {
                 this->keyEntityColumn = std::make_shared<EntityColumn>();
                 *this->keyEntityColumn = r.second;
             }

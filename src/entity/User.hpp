@@ -22,27 +22,14 @@ struct Team {
         os << "teamId: " << team.teamId << " teamName: " << team.teamName << " deptId: " << team.deptId;
         return os;
     }
-
 };
 
-template<>
-class EntityWrapper<Team> {
-public:
-    auto getReflectionInfo(Team *entity) {
-        return std::make_tuple(
-                EntityTable(entity, "Team", "team"),
-                std::make_pair(&Team::teamId,
-                               EntityColumn(entity, &entity->teamId, "teamId", "id", ColumnType::Null, KeySql::Null,
-                                            JoinType::Null)),
-                std::make_pair(&Team::teamName,
-                               EntityColumn(entity, &entity->teamName, "teamName", "team_name", ColumnType::Null,
-                                            KeySql::Null, JoinType::Null)),
-                std::make_pair(&Team::deptId,
-                               EntityColumn(entity, &entity->deptId, "deptId", "dept_id", ColumnType::Null,
-                                            KeySql::Null, JoinType::Null))
-        );
-    }
-};
+ResultMap(
+        EntityMap(Team),
+        PropertyMap(teamId, "id", ColumnType::Id),
+        PropertyMap(teamName),
+        PropertyMap(deptId, "dept_id")
+)
 
 struct Dept {
     int deptId = 0;
@@ -66,25 +53,12 @@ struct Dept {
 
 };
 
-template<>
-class EntityWrapper<Dept> {
-public:
-    auto getReflectionInfo(Dept *entity) {
-        return std::make_tuple(
-                EntityTable(entity, "Dept", "dept"),
-                std::make_pair(&Dept::deptId,
-                               EntityColumn(entity, &entity->deptId, "deptId", "id", ColumnType::Id, KeySql::Null,
-                                            JoinType::Null)),
-                std::make_pair(&Dept::deptName,
-                               EntityColumn(entity, &entity->deptName, "deptName", "name", ColumnType::Null,
-                                            KeySql::Null, JoinType::Null)),
-                std::make_pair(&Dept::teams,
-                               EntityColumn(entity, &entity->teams, "team", "id", ColumnType::Null,
-                                            KeySql::Null, JoinType::OneToMany, &Team::deptId))
-        );
-    }
-};
-
+ResultMap(
+        EntityMap(Dept),
+        PropertyMap(deptId, "id", ColumnType::Id),
+        PropertyMap(deptName, "name"),
+        PropertyMap(teams, "id", JoinType::OneToMany, &Team::deptId)
+)
 
 struct User {
     int id = 0;
@@ -99,49 +73,12 @@ struct User {
     }
 };
 
-template<>
-class EntityWrapper<User> {
-public:
-
-    auto getReflectionInfo(User *entity) {
-        return std::make_tuple(
-                EntityTable(entity, "User", "user"),
-                std::make_pair(&User::id, EntityColumn(entity, &entity->id, "id", "id", ColumnType::Null, KeySql::Null,
-                                                       JoinType::Null)),
-                std::make_pair(&User::name,
-                               EntityColumn(entity, &entity->name, "name", "name", ColumnType::Null, KeySql::Null,
-                                            JoinType::Null)),
-                std::make_pair(&User::createTime,
-                               EntityColumn(entity, &entity->createTime, "createTime", "create_time", ColumnType::Null,
-                                            KeySql::Null,
-                                            JoinType::Null)),
-                //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
-                std::make_pair(&User::team,
-                               EntityColumn(entity, &entity->team, "team", "team_id", ColumnType::Null, KeySql::Null,
-                                            JoinType::OneToOne, &Team::teamId))
-        );
-    }
-};
-
-//#define EntityResultMap(field)\
-//std::make_pair(&_Clazz::field, EntityColumn(&entity->field, #field, #field))
-//
-//#define RRR(Clazz, ...)\
-//template<>\
-//class EntityWrapper<Clazz> {\
-//public:\
-//    auto getReflectionInfo(std::shared_ptr<Clazz> entity) {\
-//        using _Clazz=Clazz;\
-//        return std::make_tuple(\
-//                EntityTable(entity, #Clazz, "user"),##__VA_ARGS__\
-//        );\
-//    }\
-//};
-//
-//RRR(User,
-//    EntityResultMap(id),
-//    EntityResultMap(name),
-//    EntityResultMap(team)
-//)
+ResultMap(
+        EntityMap(User),
+        PropertyMap(id, ColumnType::Id),
+        PropertyMap(name),
+        PropertyMap(createTime),
+        PropertyMap(team, "team_id", JoinType::OneToOne, &Team::teamId)
+)
 
 #endif //MAPPER_USER_HPP

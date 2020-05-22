@@ -17,18 +17,22 @@
 #include <time.h>
 #include <chrono>
 
+
 int main() {
 
-//    {
-//        std::cout << "===================== dept ============================================" << std::endl;
-//        Example<Dept> example;
-//        auto item1 = example.createCriteria();
-//        item1->andGreaterThanOrEqualTo(&Dept::deptId, 1);
-//        Mapper<Dept> userMapper;
-//        auto depts = userMapper.selectByExample(example);
-//        for (auto &d:depts) {
-//            std::cout << d << std::endl;
-//        }
+    {
+        for (int i = 0; i < 10; i++) {
+            std::cout << "===================== dept ============================================" << std::endl;
+            Example<Dept> example;
+            auto item1 = example.createCriteria();
+            item1->andGreaterThanOrEqualTo(&Dept::deptId, 1);
+            Mapper<Dept> userMapper;
+            auto depts = userMapper.selectByExample(example);
+            for (auto &d:depts) {
+                std::cout << d << std::endl;
+            }
+        }
+
 //        Example<Dept> example2;
 //        auto item2 = example2.createCriteria();
 //        item2->andEqualTo(&Dept::deptId, 1);
@@ -45,7 +49,7 @@ int main() {
 //        std::cout << "deleteByPrimaryKey " << userMapper.deleteByPrimaryKey(8) << std::endl;
 //
 //        std::cout << "selectAll " << userMapper.selectAll().size() << std::endl;
-//    }
+    }
 
     {
         std::cout << "===================== user ============================================" << std::endl;
