@@ -33,9 +33,10 @@ std::make_pair(Entity{},EntityTable((Entity*)nullptr, #Entity,##__VA_ARGS__))
 #define ResultMap(EntityTable, ...)\
 template<>\
 class EntityWrapper<decltype(EntityTable.first)> {\
+    using EntityClass = decltype(EntityTable.first);\
 public:\
-    auto getReflectionInfo(decltype(EntityTable.first) *entity) {\
-        using EntityClass = decltype(EntityTable.first);\
+    auto getReflectionInfo(decltype(EntityTable.first) *entity)\
+    ->decltype(std::make_tuple(EntityTable.second,##__VA_ARGS__)){\
         return std::make_tuple(EntityTable.second,##__VA_ARGS__);\
     }\
 };

@@ -137,7 +137,8 @@ private:
          * @return
          */
         template<typename Entity, typename R, typename T>
-        static auto getEntityPropertyPtr(Entity *entity, const std::pair<R T::*, EntityColumn> &pair) {
+        static auto getEntityPropertyPtr(Entity *entity, const std::pair<R T::*, EntityColumn> &pair)
+        -> decltype(&(entity->*pair.first)) {
             return &(entity->*pair.first);
         }
 
@@ -151,7 +152,8 @@ private:
          * @return
          */
         template<typename Entity, typename R, typename T>
-        static auto getEntityPropertyPtr(Entity *entity, const std::pair<std::vector<R> T::*, EntityColumn> &pair) {
+        static auto getEntityPropertyPtr(Entity *entity, const std::pair<std::vector<R> T::*, EntityColumn> &pair)
+        -> decltype(&(entity->*pair.first).front()) {
             //首先先在对应的位置上[该位置的成员是一个列表类型]加入一个项,再返回这个项的地址
             (entity->*pair.first).emplace_back(R());
             return &(entity->*pair.first).front();

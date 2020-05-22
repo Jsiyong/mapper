@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 project(mapper)
 
 ## 初始设置 #############################
-set(CMAKE_CXX_STANDARD 14)
-set(BOOST_MIN_VERSION "1.72.0")
-set(BOOST_ROOT "/usr/local/include/boost")
+set(CMAKE_CXX_STANDARD 11)
+
 message("project dir: " ${CMAKE_SOURCE_DIR})
 #项目文件路径
 set(SOURCE_FILES_DIR ${CMAKE_SOURCE_DIR}/src)
@@ -24,14 +23,10 @@ function(include_sub_directories_recursively root_dir)
     endforeach ()
 endfunction()
 
-## Boost设置 #############################
 #添加头文件搜索路径
-include_directories(/usr/local/include /usr/local/mysql/include)
+include_directories(/usr/local/mysql/include)
 #添加库文件搜索路径
-link_directories(/usr/local/lib /usr/local/mysql/lib)
-
-# 相关模块导入
-find_package(Boost ${BOOST_MIN_VERSION} COMPONENTS log REQUIRED)
+link_directories(/usr/local/mysql/lib)
 
 ## 项目最后设置 ############################
 # 先添加可执行文件路径
@@ -43,4 +38,4 @@ file(GLOB_RECURSE SOURCE_FILES ${SOURCE_FILES_DIR}/*.cpp ${SOURCE_FILES_DIR}/*.h
 # 生成可执行文件
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 # 链接库文件
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} libmysqlclient.so)
+target_link_libraries(${PROJECT_NAME} libmysqlclient.so)
