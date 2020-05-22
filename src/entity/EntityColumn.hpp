@@ -25,6 +25,7 @@ private:
     KeySql keySql = KeySql::Null;//主键生成策略
     JoinType joinType = JoinType::Null;//连接其他表的类型,暂时只有LeftJoin
     std::string joinProperty;//连接的外表的属性列
+    Object joinValue;//连接的外表的属性的值
     std::string tableAlias;//所属table的别名,方便通过这个别名,区分字段所属的不同的table,因为还有连表查询
     std::string joinTableAlias;//连接的表的别名,方便通过该别名,找到该字段连接的表的信息
     bool container = false;//该行是不是容器类型,如果是容器类型,需要做别的处理
@@ -46,6 +47,21 @@ private:
         joinTableAlias = AliasHelper::getAliasFromType<JEntity>();
     }
 
+    template<typename P, typename JEntity, typename JRet>
+    void getJoinValue(Object &value, P *pProperty, JRet JEntity::* joinColunm) {
+        value = Object(pProperty->*joinColunm);
+    }
+
+    /**
+     * 列表的不算
+     * @tparam P
+     * @tparam JEntity
+     * @tparam JRet
+     */
+    template<typename P, typename JEntity, typename JRet>
+    void getJoinValue(Object &, std::vector<P> *, JRet JEntity::* joinColunm) {}
+
+
 public:
     EntityColumn() = default;
 
@@ -65,10 +81,12 @@ public:
 
     template<typename Entity, typename T, typename J>
     EntityColumn(Entity *entity, T *pProperty, const std::string &property, const std::string &column,
-                 ColumnType columnType, KeySql keySql, JoinType joinType, const J &joinColunm) :typeIndex(typeid(T)) {
+                 ColumnType columnType, KeySql keySql, JoinType joinType, const J joinColunm)
+            :typeIndex(typeid(T)) {
         new(this)EntityColumn(entity, pProperty, property, column, columnType, keySql, joinType);
         //获取连接属性名和表别
         this->getJoinPropertyAndTableAlias(joinColunm, this->joinProperty, this->joinTableAlias);
+        this->getJoinValue(this->joinValue, pProperty, joinColunm);
     }
 
     const std::string &getColumn() const {
@@ -123,6 +141,9 @@ public:
         if (this->getTypeIndex() == typeid(int)) {
             *(int *) pProperty = value.getValue<int>();
         }
+        if (this->getTypeIndex() == typeid(std::time_t)) {
+            *(std::time_t *) pProperty = value.getValue<std::time_t>();
+        }
         if (this->getTypeIndex() == typeid(std::string)) {
             *(std::string *) pProperty = value.getValue<std::string>();
         }
@@ -138,6 +159,13 @@ public:
         }
         if (this->getTypeIndex() == typeid(std::string)) {
             return Object(*(std::string *) pProperty);
+        }
+        if (this->getTypeIndex() == typeid(std::time_t)) {
+            return Object(*(std::time_t *) pProperty);
+        }
+        if (this->getJoinType() == JoinType::OneToOne) {
+            //一对一的连接关系,还得去获取对应对象的地址的内容
+            return this->joinValue;
         }
         return {};
     }

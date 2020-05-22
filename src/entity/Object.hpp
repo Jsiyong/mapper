@@ -11,6 +11,9 @@
 #include <vector>
 #include <list>
 #include <cstring>
+#include <mysql.h>
+#include <ctime>
+#include <util/TimeUtils.hpp>
 
 /**
  * 简单包装一下Object类型,方便之后取出来使用
@@ -20,6 +23,7 @@ protected:
     struct Buff {
         std::vector<char> stringValue;//字符串的缓存区
         int intValue = 0;//整型的缓存区
+        MYSQL_TIME time = {};//数据库的时间
         std::vector<Object> values;
     } buff;//缓存数据的内容
 
@@ -48,6 +52,10 @@ public:
         std::memcpy(buff.stringValue.data(), value, strlen(value));
         buff.stringValue.emplace_back('\0');//必须加入结束符,避免之后不必要的错误
     };
+
+    Object(std::time_t value) : typeIndex(typeid(std::time_t)), null(false) {
+        buff.time = TimeUtils::convertTime2MysqlTime(value);
+    }
 
     //将可以转为int类型,都归入int类型
     Object(int value) : typeIndex(typeid(int)), null(false) { buff.intValue = value; };
@@ -94,6 +102,11 @@ public:
         return buff.stringValue.data();
     }
 
+    template<typename T>
+    typename std::enable_if<std::is_same<std::time_t, T>::value, std::time_t>::type getValue() const {
+        return TimeUtils::convertMysqlTime2Time(buff.time);
+    }
+
     /**
      * 返回的是buf的地址值
      * @return
@@ -104,6 +117,9 @@ public:
         }
         if (typeIndex == typeid(std::string)) {
             return (void *) buff.stringValue.data();
+        }
+        if (typeIndex == typeid(std::time_t)) {
+            return (void *) &buff.time;
         }
         return nullptr;
     }

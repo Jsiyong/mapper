@@ -26,6 +26,8 @@ private:
             {typeid(int),         std::bind(&PrepareBinder::bindIntValue, this, std::placeholders::_1,
                                             std::placeholders::_2)},
             {typeid(std::string), std::bind(&PrepareBinder::bindStringValue, this, std::placeholders::_1,
+                                            std::placeholders::_2)},
+            {typeid(std::time_t), std::bind(&PrepareBinder::bindTimeValue, this, std::placeholders::_1,
                                             std::placeholders::_2)}
     };
 private:
@@ -36,6 +38,17 @@ private:
      */
     void bindIntValue(int pos, const Object &value) {
         paramBinds[pos].buffer_type = MYSQL_TYPE_LONG;
+        paramBinds[pos].buffer = value.getValuePtr();
+        paramBinds[pos].is_unsigned = false;
+    }
+
+    /**
+    * 绑定长整型
+    * @param pos
+    * @param value
+    */
+    void bindTimeValue(int pos, const Object &value) {
+        paramBinds[pos].buffer_type = MYSQL_TYPE_TIMESTAMP;
         paramBinds[pos].buffer = value.getValuePtr();
         paramBinds[pos].is_unsigned = false;
     }

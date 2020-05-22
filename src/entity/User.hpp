@@ -89,10 +89,12 @@ public:
 struct User {
     int id = 0;
     std::string name = "";
+    std::time_t createTime = {};
     Team team;
 
     friend std::ostream &operator<<(std::ostream &os, const User &user) {
-        os << "id: " << user.id << " name: " << user.name << " team: " << user.team;
+        os << "id: " << user.id << " name: " << user.name << " createTime: " << user.createTime << " team: "
+           << user.team;
         return os;
     }
 };
@@ -108,6 +110,10 @@ public:
                                                        JoinType::Null)),
                 std::make_pair(&User::name,
                                EntityColumn(entity, &entity->name, "name", "name", ColumnType::Null, KeySql::Null,
+                                            JoinType::Null)),
+                std::make_pair(&User::createTime,
+                               EntityColumn(entity, &entity->createTime, "createTime", "create_time", ColumnType::Null,
+                                            KeySql::Null,
                                             JoinType::Null)),
                 //连表查询,表示用user表中的team_id去连接team表,默认是team表的主键id,也可以指定其他列
                 std::make_pair(&User::team,

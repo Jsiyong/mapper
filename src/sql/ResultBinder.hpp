@@ -24,12 +24,11 @@ private:
     std::vector<Object> bindValues;//保存的任意类型的缓存
 
 //    std::deque<bool> nulls = {false};//是不是空的
-
     //类型与处理函数映射
     std::map<int, std::function<void(int)>> typeProcessMap = {
             {MYSQL_TYPE_LONG,       std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)},
             {MYSQL_TYPE_VAR_STRING, std::bind(&ResultBinder::bindString, this, std::placeholders::_1)},
-            {MYSQL_TYPE_LONGLONG,   std::bind(&ResultBinder::bindInt, this, std::placeholders::_1)}
+            {MYSQL_TYPE_DATETIME,   std::bind(&ResultBinder::bindTime, this, std::placeholders::_1)}
     };
 private:
     void bindInt(int index) {
@@ -41,13 +40,20 @@ private:
         resultBinds[index].is_null = bindValues[index].isNullPtr();
     }
 
+    void bindTime(int index) {
+        bindValues[index] = std::type_index(typeid(std::time_t));
+        resultBinds[index].buffer_type = MYSQL_TYPE_TIMESTAMP;
+        resultBinds[index].buffer = bindValues[index].getValuePtr();
+        resultBinds[index].is_null = bindValues[index].isNullPtr();
+    }
+
     void bindString(int index) {
         bindValues[index] = std::type_index(typeid(std::string));
         bindValues[index].resize(STRING_MAX_LENGTH);
         resultBinds[index].buffer_type = MYSQL_TYPE_VAR_STRING;
         resultBinds[index].buffer = bindValues[index].getValuePtr();
         resultBinds[index].buffer_length = STRING_MAX_LENGTH;
-        resultBinds[index].is_null =  bindValues[index].isNullPtr(); //是不是空的
+        resultBinds[index].is_null = bindValues[index].isNullPtr(); //是不是空的
     }
 
 public:

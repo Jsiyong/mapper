@@ -14,49 +14,61 @@
 #include <util/AliasHelper.hpp>
 #include <common/Mapper.hpp>
 #include <cstring>
+#include <time.h>
+#include <chrono>
 
 int main() {
 
-    {
-        std::cout << "===================== dept ============================================" << std::endl;
-        Example<Dept> example;
-        auto item1 = example.createCriteria();
-        item1->andGreaterThanOrEqualTo(&Dept::deptId, 1);
-        Mapper<Dept> userMapper;
-        auto depts = userMapper.selectByExample(example);
-        for (auto &d:depts) {
-            std::cout << d << std::endl;
-        }
-        Example<Dept> example2;
-        auto item2 = example2.createCriteria();
-        item2->andEqualTo(&Dept::deptId, 1);
-        std::cout << "selectOneByExample " << userMapper.selectOneByExample(example) << std::endl;
-        std::cout << "selectOneByExample " << userMapper.selectCountByExample(example) << std::endl;
-        std::cout << "updateByExample " << userMapper.updateByExample(Dept(1, "deptA1"), example2) << std::endl;
-        std::cout << "updateByExampleSelective " << userMapper.updateByExampleSelective(Dept(1, ""), example2)
-                  << std::endl;
-        std::cout << "deleteByExample " << userMapper.deleteByExample(example2) << std::endl;
-
-
-        std::cout << "insert " << userMapper.insert(Dept(0, "deptInsertTest")) << std::endl;
-        std::cout << "deleteBy " << userMapper.deleteBy(Dept(7, "deptInsertTest")) << std::endl;
-        std::cout << "deleteByPrimaryKey " << userMapper.deleteByPrimaryKey(8) << std::endl;
-
-        std::cout << "selectAll " << userMapper.selectAll().size() << std::endl;
-    }
+//    {
+//        std::cout << "===================== dept ============================================" << std::endl;
+//        Example<Dept> example;
+//        auto item1 = example.createCriteria();
+//        item1->andGreaterThanOrEqualTo(&Dept::deptId, 1);
+//        Mapper<Dept> userMapper;
+//        auto depts = userMapper.selectByExample(example);
+//        for (auto &d:depts) {
+//            std::cout << d << std::endl;
+//        }
+//        Example<Dept> example2;
+//        auto item2 = example2.createCriteria();
+//        item2->andEqualTo(&Dept::deptId, 1);
+//        std::cout << "selectOneByExample " << userMapper.selectOneByExample(example) << std::endl;
+//        std::cout << "selectOneByExample " << userMapper.selectCountByExample(example) << std::endl;
+//        std::cout << "updateByExample " << userMapper.updateByExample(Dept(1, "deptA1"), example2) << std::endl;
+//        std::cout << "updateByExampleSelective " << userMapper.updateByExampleSelective(Dept(1, ""), example2)
+//                  << std::endl;
+//        std::cout << "deleteByExample " << userMapper.deleteByExample(example2) << std::endl;
+//
+//
+//        std::cout << "insert " << userMapper.insert(Dept(0, "deptInsertTest")) << std::endl;
+//        std::cout << "deleteBy " << userMapper.deleteBy(Dept(7, "deptInsertTest")) << std::endl;
+//        std::cout << "deleteByPrimaryKey " << userMapper.deleteByPrimaryKey(8) << std::endl;
+//
+//        std::cout << "selectAll " << userMapper.selectAll().size() << std::endl;
+//    }
 
     {
         std::cout << "===================== user ============================================" << std::endl;
         Example<User> example;
-        auto item1 = example.createCriteria();
-        item1->andIn(&User::id, std::set<int>{2, 1, 3});
-        example.orderByAsc(&User::name);
-        example.orderByDesc(&Team::teamId);
+//        auto item1 = example.createCriteria();
+////        item1->andIn(&User::id, std::set<int>{2, 1, 3});
+//        example.orderByAsc(&User::name);
+//        example.orderByDesc(&Team::teamId);
         Mapper<User> userMapper;
-        auto users = userMapper.selectByExample(example);
+        auto users = userMapper.selectAll();
         for (auto &u:users) {
             std::cout << u << std::endl;
         }
+        User user;
+
+        auto ii = &Team::teamId;
+
+        auto b = user.team.*ii;
+        user.name = "zhaoqing";
+        user.createTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        user.team.teamId = 10;
+        std::cout << "insert user " << userMapper.insert(user) << std::endl;
+
     }
     getchar();
 
