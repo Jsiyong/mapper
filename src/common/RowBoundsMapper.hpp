@@ -8,6 +8,7 @@
 #include <vector>
 #include <entity/Example.hpp>
 #include <entity/RowBounds.hpp>
+#include "ExampleMapper.hpp"
 
 /**
  * 分页查询的mapper
@@ -22,7 +23,11 @@ public:
     * @return
     */
     std::vector<T> selectByRowBounds(const T &record, const RowBounds &rowBounds) {
-
+        Example<T> example;
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(record);
+        example.limit(rowBounds.getOffset(), rowBounds.getLimit());
+        return ExampleMapper<T>().selectByExample(example);
     }
 
     /**
@@ -32,9 +37,11 @@ public:
     * @return
     */
     std::vector<T> selectByExampleAndRowBounds(const Example<T> &example, const RowBounds &rowBounds) {
-
+        auto exampleInner = example;
+        auto criteria = exampleInner.createCriteria();
+        exampleInner.limit(rowBounds.getOffset(), rowBounds.getLimit());
+        return ExampleMapper<T>().selectByExample(exampleInner);
     }
-
 };
 
 #endif //MAPPER_ROWBOUNDSMAPPER_HPP

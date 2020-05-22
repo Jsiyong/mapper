@@ -36,6 +36,13 @@ int main() {
         std::cout << "updateByExampleSelective " << userMapper.updateByExampleSelective(Dept(1, ""), example2)
                   << std::endl;
         std::cout << "deleteByExample " << userMapper.deleteByExample(example2) << std::endl;
+
+
+        std::cout << "insert " << userMapper.insert(Dept(0, "deptInsertTest")) << std::endl;
+        std::cout << "deleteBy " << userMapper.deleteBy(Dept(7, "deptInsertTest")) << std::endl;
+        std::cout << "deleteByPrimaryKey " << userMapper.deleteByPrimaryKey(8) << std::endl;
+
+        std::cout << "selectAll " << userMapper.selectAll().size() << std::endl;
     }
 
     {

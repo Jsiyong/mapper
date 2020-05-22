@@ -32,6 +32,8 @@ private:
     std::vector<EntityColumn> joinEntityColumns;
 
     std::shared_ptr<OrderBy> orderBy = nullptr;//排序的
+    //第一个参数指定第一个返回记录行的偏移量,第二个参数指定返回记录行的最大数目,若第二个参数为0,表示不合法
+    std::pair<int, int> limitPair = {0, INT32_MIN};//limit first,second
 
 private:
     std::shared_ptr<Criteria> createCriteriaInternal() {
@@ -81,7 +83,46 @@ private:
         buildOredCriteria(sqlBuilder);
     }
 
+    /**
+     * 内部构建limit语句
+     * @param sqlBuilder
+     */
+    void buildLimit(const std::shared_ptr<SQLBuilder> &sqlBuilder) const {
+        sqlBuilder->LIMIT(SQLConstants::PLACEHOLDER, SQLConstants::PLACEHOLDER);
+    }
+
 public:
+
+    /**
+     * 获取插入的上下文,包括插入语句和插入的值,插入的话可支持批量插入
+     * @param record
+     * @return
+     */
+    std::pair<std::string, std::vector<Object>> getInsertContext(const Entity &record, bool selective) {
+        std::shared_ptr<SQLBuilder> sqlBuilder = std::make_shared<SQLBuilder>();//SQL语句构建器
+        sqlBuilder->INSERT_INTO(table.getTableName());//插入语句不能有别名
+        //获取该对象的信息
+        std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
+        std::shared_ptr<Criteria> insertCriteria = std::make_shared<Criteria>(
+                const_cast<decltype(propertyMap) *>(&propertyMap),
+                const_cast<decltype(table) *>(&table));
+        //需要转为Object,不然会变成空类型
+        EntityHelper::getResultMap(const_cast<Entity *>(&record), resultMap);
+        for (auto &entityProperty:resultMap->getPropertyMap()) {
+            //不是一对多的关系才可以设置
+            if (entityProperty.second.getJoinType() != JoinType::OneToMany
+                && entityProperty.second.getTableAlias() == this->table.getAlias()//不是自己的表也不算
+                && entityProperty.second.getColumnType() != ColumnType::Id) {//ID列也不能更改
+                if (selective && entityProperty.second.isNull()) {
+                    continue;
+                }
+                sqlBuilder->VALUES(entityProperty.second.getColumn(), SQLConstants::PLACEHOLDER);
+                insertCriteria->andEqualTo(entityProperty.second.getProperty(),
+                                           entityProperty.second.getEntityFieldValue());
+            }
+        }
+        return std::make_pair(sqlBuilder->toString(), ExampleHelper::getValuesFromOredCriteria({insertCriteria}));
+    }
 
     /**
      * 获取删除语句的上下文
@@ -106,12 +147,12 @@ public:
         //专门是update语句的Criteria
         //获取该对象的信息
         std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
-        std::shared_ptr<Criteria> updateCriteria = std::make_shared<Criteria>(
-                const_cast<decltype(propertyMap) *>(&propertyMap),
-                const_cast<decltype(table) *>(&table));;
-
         //需要转为Object,不然会变成空类型
         EntityHelper::getResultMap(const_cast<Entity *>(&param), resultMap);
+        std::shared_ptr<Criteria> updateCriteria = std::make_shared<Criteria>(
+                const_cast<decltype(propertyMap) *>(&propertyMap),
+                const_cast<decltype(table) *>(&table));
+
         for (auto &entityProperty:resultMap->getPropertyMap()) {
             //不是一对多的关系才可以设置
             if (entityProperty.second.getJoinType() != JoinType::OneToMany
@@ -162,7 +203,17 @@ public:
         }
         buildFromWhereStatementByExample(sqlBuilder);
         buildOrderBy(sqlBuilder);//加上排序信息
-        return std::make_pair(sqlBuilder->toString(), ExampleHelper::getValuesFromOredCriteria(this->oredCriteria));
+
+        auto oredCriteriaValues = ExampleHelper::getValuesFromOredCriteria(this->oredCriteria);
+        //添加limit
+
+        //若limit参数有效
+        if (limitPair.second != INT32_MIN) {
+            buildLimit(sqlBuilder);
+            oredCriteriaValues.emplace_back(limitPair.first);
+            oredCriteriaValues.emplace_back(limitPair.second);
+        }
+        return std::make_pair(sqlBuilder->toString(), oredCriteriaValues);
     }
 
     std::map<std::string, EntityColumn> getColumnAliasMap() const {
@@ -173,8 +224,27 @@ public:
         return res;
     }
 
-    const std::shared_ptr<EntityColumn> &getKeyEntityColumn() const {
-        return keyEntityColumn;
+    /**
+     * 若entity为空,则返回本类中的entityColumn,否则返回该对象自己的
+     * @param entity
+     * @return
+     */
+    std::shared_ptr<EntityColumn> getKeyEntityColumn(const Entity *entity = nullptr) const {
+        if (nullptr == entity) {
+            return keyEntityColumn;
+        }
+        std::shared_ptr<EntityTableMap> resultMap = std::make_shared<EntityTableMap>();
+        std::shared_ptr<EntityColumn> primaryEntityColumn = std::make_shared<EntityColumn>();
+        //需要转为Object,不然会变成空类型
+        EntityHelper::getResultMap(const_cast<Entity *>(entity), resultMap);
+        for (auto &entityProperty:resultMap->getPropertyMap()) {
+            if (entityProperty.second.getTableAlias() == this->table.getAlias()//不是自己的表不算
+                && entityProperty.second.getColumnType() == ColumnType::Id) {//ID列
+                *primaryEntityColumn = entityProperty.second;
+                return primaryEntityColumn;
+            }
+        }
+        return nullptr;
     }
 
     const std::vector<EntityColumn> &getJoinEntityColumns() const {
@@ -305,6 +375,21 @@ public:
             orderBy = std::make_shared<OrderBy>(&propertyMap);
         }
         return orderBy->asc(t);
+    }
+
+    /**
+     * 分页
+     * @param offset 偏移量
+     * @param size 查询数量
+     */
+    void limit(int offset, int size) {
+        if (0 < offset && 0 >= size)
+            return;
+        this->limitPair = std::make_pair(offset, size);
+    }
+
+    void limit(int size) {
+        limit(0, size);
     }
 };
 

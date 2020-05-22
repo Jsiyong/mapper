@@ -5,6 +5,9 @@
 #ifndef MAPPER_BASEMAPPER_HPP
 #define MAPPER_BASEMAPPER_HPP
 
+#include <util/QueryHelper.hpp>
+#include "ExampleMapper.hpp"
+
 /**
  * 通用的查询接口
  * @tparam T
@@ -20,7 +23,11 @@ public:
      * @return
      */
     T selectOne(const T &record) {
-
+        auto results = select(record);
+        if (results.size() > 1) {
+            throw MapperException("select-results have more than one record");
+        }
+        return results.empty() ? T{} : results.front();
     }
 
     /**
@@ -28,8 +35,12 @@ public:
      * @param record
      * @return
      */
-    std::vector <T> select(const T &record) {
-
+    std::vector<T> select(const T &record) {
+        Example<T> example;
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(record);
+        ExampleMapper<T> exampleMapper;
+        return exampleMapper.selectByExample(example);
     }
 
     /**
@@ -37,8 +48,9 @@ public:
      * @param record
      * @return
      */
-    std::vector <T> selectAll() {
-
+    std::vector<T> selectAll() {
+        Example<T> example;
+        return ExampleMapper<T>().selectByExample(example);
     }
 
     /**
@@ -47,7 +59,10 @@ public:
      * @return
      */
     int selectCount(const T &record) {
-
+        Example<T> example;
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(record);
+        return ExampleMapper<T>().selectCountByExample(example);
     }
 
     /**
@@ -56,9 +71,12 @@ public:
      * @param key
      * @return
      */
-    template<typename Object>
     T selectByPrimaryKey(const Object &key) {
-
+        Example<T> example;
+        auto keyColumn = example.getKeyEntityColumn();
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(keyColumn->getProperty(), key);
+        return ExampleMapper<T>().selectOneByExample(example);
     }
 
     /**
@@ -67,9 +85,12 @@ public:
      * @param key
      * @return
      */
-    template<typename Object>
     bool existsWithPrimaryKey(const Object &key) {
-
+        Example<T> example;
+        auto keyColumn = example.getKeyEntityColumn();
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(keyColumn->getProperty(), key);
+        return ExampleMapper<T>().selectCountByExample(example) > 0;
     }
 
     /////////////////////////// update /////////////////////////////
@@ -79,7 +100,11 @@ public:
      * @return
      */
     int updateByPrimaryKey(const T &record) {
-
+        Example<T> example;
+        auto keyColumn = example.getKeyEntityColumn(record);
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(keyColumn->getProperty(), keyColumn->getEntityFieldValue());
+        return ExampleMapper<T>().updateByExample(record, example);
     }
 
     /**
@@ -88,7 +113,11 @@ public:
      * @return
      */
     int updateByPrimaryKeySelective(const T &record) {
-
+        Example<T> example;
+        auto keyColumn = example.getKeyEntityColumn(record);
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(keyColumn->getProperty(), keyColumn->getEntityFieldValue());
+        return ExampleMapper<T>().updateByExampleSelective(record, example);
     }
 
     /////////////////////////// insert /////////////////////////////
@@ -99,7 +128,9 @@ public:
      * @return
      */
     int insert(const T &record) {
-
+        Example<T> example;
+        auto insertContext = example.getInsertContext(record, false);
+        return QueryHelper::execute(insertContext.first, insertContext.second).second;
     }
 
     /**
@@ -108,7 +139,9 @@ public:
      * @return
      */
     int insertSelective(const T &record) {
-
+        Example<T> example;
+        auto insertContext = example.getInsertContext(record, true);
+        return QueryHelper::execute(insertContext.first, insertContext.second).second;
     }
     /////////////////////////// delete /////////////////////////////
     /**
@@ -117,7 +150,10 @@ public:
     * @return
     */
     int deleteBy(const T &record) {
-
+        Example<T> example;
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(record);
+        return ExampleMapper<T>().deleteByExample(example);
     }
 
     /**
@@ -126,9 +162,12 @@ public:
      * @param key
      * @return
      */
-    template<typename Object>
     int deleteByPrimaryKey(const Object &key) {
-
+        Example<T> example;
+        auto keyColumn = example.getKeyEntityColumn();
+        auto criteria = example.createCriteria();
+        criteria->andEqualTo(keyColumn->getProperty(), key);
+        return ExampleMapper<T>().deleteByExample(example);
     }
 };
 

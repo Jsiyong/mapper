@@ -24,7 +24,7 @@ public:
 
 public:
     RowBounds() {
-        this->limit = 2147483647;
+        this->limit = INT32_MAX;
     }
 
     RowBounds(int offset, int limit) {
