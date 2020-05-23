@@ -1,5 +1,5 @@
-# 高仿通用mapper的ORM库
-基于c++11的mysql api的封装
+# 基于C++11的ORM库
+基于c++11的mysql api的封装，高仿通用mapper的接口使用方式
 
 ## 特点
 1. 模仿通用mapper的接口方式，方便数据库的查询
