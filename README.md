@@ -1,6 +1,13 @@
 # 基于C++11的ORM库
 基于c++11的mysql api的封装，高仿通用mapper的接口使用方式
 
+## 目录
+
+* [特点](##特点)
+* [项目开发环境说明](##项目开发环境说明)
+* [快速开始](##快速开始)
+* [联系方式](#联系方式)
+
 ## 特点
 1. 模仿通用mapper的接口方式，方便数据库的查询
 1. 项目基于C++11,不需要用到更高版本的C++特性
@@ -312,3 +319,6 @@ id: 8 name: World-School createTime: 1590210918 clazzs: [ { classId: 2 className
 id: 9 name: My-School createTime: 1590210918 clazzs: [ { classId: 3 className: classC schoolId: 9} ]
 id: 10 name: Hello-School_update createTime: 1590211577 clazzs: []
 ```
+
+## 联系方式
+897894556@qq.com
