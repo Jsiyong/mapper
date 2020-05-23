@@ -28,7 +28,7 @@ ResultMap(
         EntityMap(Team),
         PropertyMap(teamId, "id", ColumnType::Id),
         PropertyMap(teamName),
-        PropertyMap(deptId, "dept_id")
+        PropertyMap(deptId)
 )
 
 struct Dept {

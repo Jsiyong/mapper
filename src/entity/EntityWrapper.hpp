@@ -7,6 +7,8 @@
 
 #include <memory>
 #include <type_traits>
+#include "EntityColumn.hpp"
+#include "EntityTable.hpp"
 #include "EntityTableMap.hpp"
 
 /**

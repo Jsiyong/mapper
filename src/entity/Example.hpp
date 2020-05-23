@@ -219,7 +219,10 @@ public:
     std::map<std::string, EntityColumn> getColumnAliasMap() const {
         std::map<std::string, EntityColumn> res;
         for (auto &pm :this->propertyMap) {
-            res.insert(std::make_pair(pm.second.getAlias(), pm.second));
+            //OneToMany的不算
+            if (pm.second.getJoinType() != JoinType::OneToMany) {
+                res.insert(std::make_pair(pm.second.getAlias(), pm.second));
+            }
         }
         return res;
     }

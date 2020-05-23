@@ -101,7 +101,7 @@ public:
      */
     int updateByPrimaryKey(const T &record) {
         Example<T> example;
-        auto keyColumn = example.getKeyEntityColumn(record);
+        auto keyColumn = example.getKeyEntityColumn(&record);
         auto criteria = example.createCriteria();
         criteria->andEqualTo(keyColumn->getProperty(), keyColumn->getEntityFieldValue());
         return ExampleMapper<T>().updateByExample(record, example);
